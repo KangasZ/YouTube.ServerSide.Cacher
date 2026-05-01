@@ -14,4 +14,6 @@ Pass in a cookies.txt file to the container. You can use `Path__CookiePath` as a
 
 Maybe will add more documentation in the future, however for now this is all you get.
 
-##
+## Self-Notes
+
+This is hosted both on my personal git server and on github. to push to both, use `git push github && git push gitea`
