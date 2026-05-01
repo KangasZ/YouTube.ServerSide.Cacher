@@ -1,0 +1,16 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "YT.Cacher", "YT.Cacher\YT.Cacher.csproj", "{F252F37A-8CE6-46C4-B7B9-A2AEDDE85DD1}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{F252F37A-8CE6-46C4-B7B9-A2AEDDE85DD1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F252F37A-8CE6-46C4-B7B9-A2AEDDE85DD1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F252F37A-8CE6-46C4-B7B9-A2AEDDE85DD1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F252F37A-8CE6-46C4-B7B9-A2AEDDE85DD1}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal

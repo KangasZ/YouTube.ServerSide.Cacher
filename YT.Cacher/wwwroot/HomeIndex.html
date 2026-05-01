@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>YT Cacher</title>
+    <style>
+        body { font-family: sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; background: #1e1e1e; color: #eee; }
+        .container { display: flex; gap: 0.5rem; }
+        input, button { padding: 0.6rem 1rem; font-size: 1rem; border-radius: 4px; border: 1px solid #444; }
+        input { background: #2b2b2b; color: #eee; width: 320px; }
+        button { background: #007acc; color: white; cursor: pointer; border: none; }
+        button:hover { background: #0098ff; }
+        #status { margin-top: 1rem; min-height: 1.2em; text-align: center; }
+        .wrapper { display: flex; flex-direction: column; align-items: center; }
+    </style>
+</head>
+<body>
+<div class="wrapper">
+    <div class="container">
+        <input id="vid" type="text" placeholder="YouTube video ID or URL" autofocus />
+        <button id="go">Enter</button>
+    </div>
+    <div id="status"></div>
+</div>
+<script>
+    const input = document.getElementById('vid');
+    const button = document.getElementById('go');
+    const status = document.getElementById('status');
+
+    function extractVideoId(raw) {
+        const value = raw.trim();
+        if (!value) return null;
+
+        // Try parsing as URL first
+        try {
+            const url = new URL(value);
+            const host = url.hostname.replace(/^www\./, '');
+
+            if (host === 'youtu.be') {
+                return url.pathname.slice(1).split('/')[0] || null;
+            }
+            if (host.endsWith('youtube.com') || host.endsWith('youtube-nocookie.com')) {
+                const v = url.searchParams.get('v');
+                if (v) return v;
+
+                // /embed/{id}, /shorts/{id}, /live/{id}
+                const m = url.pathname.match(/^\/(?:embed|shorts|live|v)\/([^/?#]+)/);
+                if (m) return m[1];
+            }
+        } catch {
+            // Not a URL — fall through
+        }
+
+        // Plain ID (typically 11 chars, but accept any safe token)
+        if (/^[A-Za-z0-9_-]{6,}$/.test(value)) return value;
+
+        return null;
+    }
+
+    async function submit() {
+        const id = extractVideoId(input.value);
+        if (!id) {
+            status.textContent = 'Invalid video ID or URL';
+            return;
+        }
+
+        const url = `${window.location.origin}/watch?v=${encodeURIComponent(id)}`;
+        try {
+            await navigator.clipboard.writeText(url);
+            status.textContent = `Copied: ${url}`;
+        } catch {
+            status.textContent = `URL: ${url}`;
+        }
+
+        fetch(`/queue?v=${encodeURIComponent(id)}`, { method: 'POST' })
+            .then(r => { if (!r.ok) throw new Error(r.statusText); })
+            .catch(err => status.textContent += ` (queue error: ${err.message})`);
+    }
+
+    button.addEventListener('click', submit);
+    input.addEventListener('keydown', e => { if (e.key === 'Enter') submit(); });
+</script>
+</body>
+</html>
