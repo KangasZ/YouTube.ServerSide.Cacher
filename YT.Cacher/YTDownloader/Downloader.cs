@@ -64,7 +64,7 @@ public class Downloader
             "--audio-quality 0",
             "-f \"bv[ext=webm]+ba[ext=webm]\"",
             $"-o \"{cacheManager.CachePath}%(id)s.%(ext)s\"",
-            "-S webm",
+            "-S res:1080,res:720,webm",
             $"\"{videoUrl}\""
         };
 
