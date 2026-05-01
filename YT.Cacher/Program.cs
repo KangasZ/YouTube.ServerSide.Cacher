@@ -22,10 +22,6 @@ public class Program
         builder.Services.AddControllers();
 
         var app = builder.Build();
-        app.Logger.LogInformation("ENV Paths__CookiePath = {Env}",
-            Environment.GetEnvironmentVariable("Paths__CookiePath"));
-        app.Logger.LogInformation("CFG Paths:CookiePath = {Cfg}",
-            builder.Configuration["Paths:CookiePath"]);
         // Configure the HTTP request pipeline.
         if (app.Environment.IsDevelopment()) app.MapOpenApi();
 
