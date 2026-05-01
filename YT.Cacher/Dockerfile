@@ -2,7 +2,11 @@
 RUN apt-get update && apt-get install -y --no-install-recommends \
     ffmpeg jq curl 7zip \
     && rm -rf /var/lib/apt/lists/*
-RUN curl -fsSL https://deno.land/install.sh | sh
+ENV DENO_INSTALL=/usr/local
+RUN curl -fsSL https://deno.land/install.sh -o /tmp/deno-install.sh \
+    && sh /tmp/deno-install.sh -y \
+    && rm /tmp/deno-install.sh \
+    && deno --version
 RUN set -eux; \
     release_json="$(curl -fsSL https://api.github.com/repos/yt-dlp/yt-dlp-nightly-builds/releases/latest)"; \
     version="$(printf '%s' "$release_json" | jq -r '.tag_name')"; \
@@ -11,10 +15,10 @@ RUN set -eux; \
     curl -fsSL "$url" -o /usr/local/bin/yt-dlp; \
     chmod +x /usr/local/bin/yt-dlp; \
     yt-dlp --version
-USER 2660
 WORKDIR /app
 EXPOSE 8080
 EXPOSE 8081
+USER root
 
 FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 ARG BUILD_CONFIGURATION=Release
