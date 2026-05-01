@@ -14,6 +14,7 @@ Pass in a cookies.txt file to the container. You can use `Path__CookiePath` as a
 
 Maybe will add more documentation in the future, however for now this is all you get.
 
+You need to have yt-dlp, deno, and ffmpeg installed and on the path. The dockerfile does this, however for local development you'll need to do it yourself.
 
 ### Reverse Proxy
 
