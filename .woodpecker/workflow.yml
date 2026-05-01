@@ -9,4 +9,4 @@ steps:
           repo: ${CONF_WP_REGISTRY}/yt-cacher
           registry: ${CONF_WP_REGISTRY}
           tags: latest
-          dockerfile: ./external-nginx/Dockerfile
+          dockerfile: ./YT.Cacher/Dockerfile
