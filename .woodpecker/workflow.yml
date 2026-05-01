@@ -1,0 +1,12 @@
+when:
+    - event: manual
+      branch: main
+
+steps:
+    - name: build-cacher
+      image: woodpeckerci/plugin-docker-buildx
+      settings:
+          repo: ${CONF_WP_REGISTRY}/${CI_REPO}
+          registry: ${CONF_WP_REGISTRY}
+          tags: latest
+          dockerfile: ./external-nginx/Dockerfile
