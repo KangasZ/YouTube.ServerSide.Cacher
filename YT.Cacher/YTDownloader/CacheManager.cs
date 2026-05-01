@@ -2,11 +2,12 @@ namespace YT.Cacher.YTDownloader;
 
 public class CacheManager
 {
-    public readonly string CachePath = "./cache/";
+    public string CachePath { get; }
     private readonly ILogger<CacheManager>? logger;
 
-    public CacheManager(ILogger<CacheManager>? logger = null)
+    public CacheManager(IConfiguration configuration, ILogger<CacheManager>? logger = null)
     {
+        CachePath = configuration["Paths:CachePath"] ?? "./cache/";
         this.logger = logger;
         if (!Directory.Exists(CachePath)) Directory.CreateDirectory(CachePath);
     }
