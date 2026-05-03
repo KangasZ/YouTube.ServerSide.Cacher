@@ -15,7 +15,10 @@ public class StatusController(YoutubeVideoManager videoManager) : ControllerBase
             return BadRequest();
 
         var id = videoManager.GetVideoId(v);
-
+        if (string.IsNullOrEmpty(id))
+        {
+            return BadRequest();
+        }
         var information = videoManager.GetDownloadInformation(id);
         return Ok(information);
     }

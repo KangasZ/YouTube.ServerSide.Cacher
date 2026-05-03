@@ -142,7 +142,7 @@ public class Downloader
         {
             if (e.Data is null)
                 return;
-            logger.LogDebug("yt-dlp: {Line}", e.Data);
+            logger.LogError("yt-dlp: {Line}", e.Data);
         };
 
         logger.LogInformation(

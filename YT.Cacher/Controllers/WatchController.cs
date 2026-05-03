@@ -15,7 +15,15 @@ public class WatchController(YoutubeVideoManager youtubeVideoManager) : Controll
             return BadRequest();
 
         var id = youtubeVideoManager.GetVideoId(v);
+        if (string.IsNullOrEmpty(id))
+        {
+            return BadRequest();
+        }
         var cachePath = await youtubeVideoManager.GetVideoPath(id);
+        if (cachePath == null)
+        {
+            return BadRequest();
+        }
         Response.Headers.CacheControl = "public, max-age=43200, immutable";
         return PhysicalFile(cachePath, "video/webm", true);
     }

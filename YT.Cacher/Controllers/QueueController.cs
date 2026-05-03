@@ -14,6 +14,10 @@ public class QueueController(YoutubeVideoManager youtubeVideoManager) : Controll
             return BadRequest();
 
         var id = youtubeVideoManager.GetVideoId(v);
+        if (string.IsNullOrEmpty(id))
+        {
+            return BadRequest();
+        }
         return Accepted(youtubeVideoManager.QueueDownload(id));
     }
 }

@@ -3,3 +3,4 @@
 **/obj/**
 **/cookies/**
 .idea/*
+appsettings.*.json
