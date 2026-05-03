@@ -1,0 +1,15 @@
+﻿services:
+    YT.Cacher:
+        image: YT.Cacher
+        build:
+            context: .
+            dockerfile: YT.Cacher/Dockerfile
+        ports:
+            - "8080:8080"
+        environment:
+            - Paths__CachePath=/data/cache/
+            - Paths__CookiePath=/data/cookies/cookies.txt
+        restart: unless-stopped
+        volumes:
+            - /path/to/cookies.txt:/data/cookies/cookies.txt
+            - /path/to/cache:/data/cache
