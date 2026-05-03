@@ -7,14 +7,12 @@ public class YoutubeVideoManager(CacheManager cacheManager, Downloader downloade
 {
     private DownloadInformation FinishedInformation = new DownloadInformation()
     {
-        StartTime = DateTime.UtcNow,
         AudioProgress = 100,
         VideoProgress = 100,
     };
 
     private DownloadInformation StartedInformation = new DownloadInformation()
     {
-        StartTime = DateTime.UtcNow,
         AudioProgress = 0,
         VideoProgress = 0,
     };

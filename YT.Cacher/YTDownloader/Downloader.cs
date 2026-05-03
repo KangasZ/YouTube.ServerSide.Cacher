@@ -7,7 +7,7 @@ namespace YT.Cacher.YTDownloader;
 
 public record DownloadInformation
 {
-    public DateTime StartTime { get; set; }
+    public DateTime StartTime { get; set; } = DateTime.UtcNow;
     public string TotalSize { get; set; } = "0B";
     public double VideoProgress { get; set; }
     public string VideoSize { get; set; } = "0B";
