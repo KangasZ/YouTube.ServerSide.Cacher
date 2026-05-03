@@ -4,11 +4,9 @@ public class PathManager
 {
     public string CookiesPath { get; }
 
-    public readonly string DenoPath =
-        OperatingSystem.IsWindows() ? "deno.exe" : "deno";
+    public readonly string DenoPath = OperatingSystem.IsWindows() ? "deno.exe" : "deno";
 
-    public readonly string FfmpegPath =
-        OperatingSystem.IsWindows() ? "ffmpeg.exe" : "ffmpeg";
+    public readonly string FfmpegPath = OperatingSystem.IsWindows() ? "ffmpeg.exe" : "ffmpeg";
 
     public readonly string YtdlPath = OperatingSystem.IsWindows() ? "yt-dlp.exe" : "yt-dlp";
 

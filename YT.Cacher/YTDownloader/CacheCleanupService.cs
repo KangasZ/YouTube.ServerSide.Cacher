@@ -22,7 +22,6 @@ public class CacheCleanupService(CacheManager cacheManager, ILogger<CacheCleanup
             {
                 logger.LogError(ex, "Cache cleanup failed");
             }
-        }
-        while (await timer.WaitForNextTickAsync(stoppingToken));
+        } while (await timer.WaitForNextTickAsync(stoppingToken));
     }
 }

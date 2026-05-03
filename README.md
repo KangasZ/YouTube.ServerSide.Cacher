@@ -45,28 +45,8 @@ The dockerfile installs the latest Deno and yt-dlp, then whatever ffmpeg package
 Considerations:
 - Reverse proxies may block large file transfers by default, make sure it does. Nginx has no limit on outbound files by default.
 - Reverse proxies may have gateway timeouts if no response is sent. In the case of this app, while yt-dlp downloads the video, it will not be sending any information to the client. You may want to add a larger timeout to your proxy.
+- You can setup a cache on your proxy such that videos are served from NGINX rather than .NET, however it's unclear how much of a benefit this is.
 
-Personally I use NGINX and use the following configuration to make sure nothing is cached. NGINX doesn't care how large of files the host is sending so there's no max size we need here specifically.
-
-```nginx configuration
-location / {
-    ...otherconfiguration
-
-    add_header Cache-Control no-cache;
-    types {
-        video/webm webm;
-    }
-    add_header 'Access-Control-Allow-Origin' '*' always;
-    add_header 'Access-Control-Expose-Headers' 'Content-Length';
-    if ($request_method = 'OPTIONS') {
-        add_header 'Access-Control-Allow-Origin' '*';
-        add_header 'Access-Control-Max-Age' 1728000;
-        add_header 'Content-Type' 'text/plain charset=UTF-8';
-        add_header 'Content-Length' 0;
-        return 204;
-    }
-}
-```
 ## Self-Notes
 
 This is hosted both on my personal git server and on github. to push to both, use `git push github && git push gitea`

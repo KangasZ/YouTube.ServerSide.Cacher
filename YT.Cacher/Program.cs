@@ -1,3 +1,5 @@
+using System.Text.Json.Serialization;
+using YT.Cacher.VideoManager;
 using YT.Cacher.YTDownloader;
 
 namespace YT.Cacher;
@@ -18,12 +20,18 @@ public class Program
         builder.Services.AddSingleton<PathManager>();
         builder.Services.AddSingleton<CacheManager>();
         builder.Services.AddHostedService<CacheCleanupService>();
+        builder.Services.AddSingleton<YoutubeVideoManager>();
 
-        builder.Services.AddControllers();
+        builder
+            .Services.AddControllers()
+            .AddJsonOptions(options =>
+                options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter())
+            );
 
         var app = builder.Build();
         // Configure the HTTP request pipeline.
-        if (app.Environment.IsDevelopment()) app.MapOpenApi();
+        if (app.Environment.IsDevelopment())
+            app.MapOpenApi();
 
         app.UseHttpsRedirection();
 
