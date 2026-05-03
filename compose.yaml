@@ -1,6 +1,5 @@
 ﻿services:
     YT.Cacher:
-        image: YT.Cacher
         build:
             context: .
             dockerfile: YT.Cacher/Dockerfile
@@ -11,5 +10,5 @@
             - Paths__CookiePath=/data/cookies/cookies.txt
         restart: unless-stopped
         volumes:
-            - /path/to/cookies.txt:/data/cookies/cookies.txt
-            - /path/to/cache:/data/cache
+            - /path/to/cookies.txt:/data/cookies/cookies.txt:rw
+            - /path/to/cache:/data/cache:rw
