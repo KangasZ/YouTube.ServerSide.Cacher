@@ -8,13 +8,13 @@ namespace YT.Cacher.YTDownloader;
 public record DownloadInformation
 {
     public DateTime StartTime { get; set; } = DateTime.UtcNow;
+    public string? CurrentDownloadSpeed { get; set; }
     public string TotalSize { get; set; } = "0B";
+    public double TotalProgress { get; set; }
     public double VideoProgress { get; set; }
     public string VideoSize { get; set; } = "0B";
     public double AudioProgress { get; set; }
     public string AudioSize { get; set; } = "0B";
-    public string? VideoDownloadSpeed { get; set; }
-    public string? AudioDownloadSpeed { get; set; }
     public StatusEnum Status { get; set; } = StatusEnum.Queued;
 }
 
@@ -111,6 +111,7 @@ public class Downloader
             "-f \"bv*[height<=1080]+ba\"",
             $"-o \"{cacheManager.CachePath}%(id)s.%(ext)s\"",
             "-t mp4",
+            "--progress-delta 0.5",
             "--progress-template \"download:[dlstats] kind=%(info.vcodec)s/%(info.acodec)s fid=%(info.format_id)s pct=%(progress._percent_str)s size=%(progress._total_bytes_str)s speed=%(progress._speed_str)s eta=%(progress._eta_str)s\"",
             $"\"https://youtube.com/watch?v={id}\"",
         };
@@ -178,42 +179,43 @@ public class Downloader
     {
         var m = StatsRegex.Match(line);
         if (!m.Success)
+        {
+            logger.LogDebug("Unhandled stats line: {Line}", line);
             return;
+        }
 
         var kind =
             m.Groups["vc"].Value == "none" ? "audio"
             : m.Groups["ac"].Value == "none" ? "video"
             : "muxed";
 
-        if (kind == "video")
+        var parseSuccess = double.TryParse(
+            m.Groups["pct"].Value,
+            System.Globalization.NumberStyles.Float,
+            System.Globalization.CultureInfo.InvariantCulture,
+            out var pct
+        );
+
+        switch (kind)
         {
-            if (
-                double.TryParse(
-                    m.Groups["pct"].Value,
-                    System.Globalization.NumberStyles.Float,
-                    System.Globalization.CultureInfo.InvariantCulture,
-                    out var pct
-                )
-            )
-                information.VideoProgress = pct;
-            information.VideoSize = m.Groups["size"].Value;
-            information.VideoDownloadSpeed = m.Groups["speed"].Value;
-            information.Status = StatusEnum.DownloadingVideo;
-        }
-        if (kind == "audio")
-        {
-            if (
-                double.TryParse(
-                    m.Groups["pct"].Value,
-                    System.Globalization.NumberStyles.Float,
-                    System.Globalization.CultureInfo.InvariantCulture,
-                    out var pct
-                )
-            )
-                information.AudioProgress = pct;
-            information.AudioSize = m.Groups["size"].Value;
-            information.AudioDownloadSpeed = m.Groups["speed"].Value;
-            information.Status = StatusEnum.DownloadingAudio;
+            case "video":
+                information.VideoProgress = parseSuccess ? pct : 0;
+                information.VideoSize = m.Groups["size"].Value;
+                information.CurrentDownloadSpeed = m.Groups["speed"].Value;
+                information.Status = StatusEnum.DownloadingVideo;
+                break;
+            case "audio":
+                information.VideoProgress = parseSuccess ? pct : 0;
+                information.AudioSize = m.Groups["size"].Value;
+                information.CurrentDownloadSpeed = m.Groups["speed"].Value;
+                information.Status = StatusEnum.DownloadingAudio;
+                break;
+            case "muxed":
+                information.TotalProgress = parseSuccess ? pct : 0;
+                information.TotalSize = m.Groups["size"].Value;
+                information.CurrentDownloadSpeed = m.Groups["speed"].Value;
+                information.Status = StatusEnum.Downloading;
+                break;
         }
     }
 }

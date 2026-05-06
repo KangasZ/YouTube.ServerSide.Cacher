@@ -136,6 +136,20 @@
             color: #e74c3c;
         }
 
+        #stats .fill.total {
+            background: #f1c40f;
+        }
+
+        #stats.state-done .fill,
+        #stats.state-done .fill.total {
+            background: #2ecc71;
+        }
+
+        #stats.state-failed .fill,
+        #stats.state-failed .fill.total {
+            background: #e74c3c;
+        }
+
         button.danger {
             background: #c0392b;
         }
@@ -163,26 +177,30 @@
             <span class="label">Elapsed</span>
             <span id="s-elapsed">-</span>
         </div>
-        <div class="row">
-            <span class="label">Total Size</span>
-            <span id="s-total-size">-</span>
-        </div>
+        <div class="row"><span class="label">Download Speed</span><span id="s-speed">-</span></div>
 
-        <h4>Video</h4>
+        <h4>Total</h4>
         <div class="bar">
-            <div class="fill" id="fill-video"></div>
+            <div class="fill total" id="fill-total"></div>
         </div>
-        <div class="row"><span class="label">Progress</span><span id="s-vpct">-</span></div>
-        <div class="row"><span class="label">Size</span><span id="s-vsize">-</span></div>
-        <div class="row"><span class="label">Speed</span><span id="s-vspeed">-</span></div>
+        <div class="row"><span class="label">Progress</span><span id="s-tpct">-</span></div>
+        <div class="row"><span class="label">Size</span><span id="s-total-size">-</span></div>
 
-        <h4>Audio</h4>
-        <div class="bar">
-            <div class="fill audio" id="fill-audio"></div>
-        </div>
-        <div class="row"><span class="label">Progress</span><span id="s-apct">-</span></div>
-        <div class="row"><span class="label">Size</span><span id="s-asize">-</span></div>
-        <div class="row"><span class="label">Speed</span><span id="s-aspeed">-</span></div>
+<!--        <h4>Video</h4>-->
+<!--        <div class="bar">-->
+<!--            <div class="fill" id="fill-video"></div>-->
+<!--        </div>-->
+<!--        <div class="row"><span class="label">Progress</span><span id="s-vpct">-</span></div>-->
+<!--        <div class="row"><span class="label">Size</span><span id="s-vsize">-</span></div>-->
+<!--        <div class="row"><span class="label">Speed</span><span id="s-vspeed">-</span></div>-->
+
+<!--        <h4>Audio</h4>-->
+<!--        <div class="bar">-->
+<!--            <div class="fill audio" id="fill-audio"></div>-->
+<!--        </div>-->
+<!--        <div class="row"><span class="label">Progress</span><span id="s-apct">-</span></div>-->
+<!--        <div class="row"><span class="label">Size</span><span id="s-asize">-</span></div>-->
+<!--        <div class="row"><span class="label">Speed</span><span id="s-aspeed">-</span></div>-->
     </div>
 </div>
 <script>
@@ -191,7 +209,7 @@
     const status = document.getElementById('status');
     const stats = document.getElementById('stats');
     const fill = document.getElementById('fill');
-
+    const fillTotal = document.getElementById('fill-total');
     let pollTimer = null;
 
     function extractVideoId(raw) {
@@ -221,8 +239,8 @@
     const DONE_STATES = new Set(['Success', 'Cached']);
     const FAIL_STATES = new Set(['Failed', 'Canceled']);
 
-    const fillVideo = document.getElementById('fill-video');
-    const fillAudio = document.getElementById('fill-audio');
+    // const fillVideo = document.getElementById('fill-video');
+    // const fillAudio = document.getElementById('fill-audio');
 
     function clampPct(n) {
         const v = typeof n === 'number' ? n : 0;
@@ -248,22 +266,23 @@
         const vSize = info.videoSize ?? '-';
         const aSize = info.audioSize ?? '-';
         const totalSize = info.totalSize ?? '-';
-        const vSpeed = info.videoDownloadSpeed ?? '-';
-        const aSpeed = info.audioDownloadSpeed ?? '-';
         const start = info.startTime ?? null;
 
-        fillVideo.style.width = `${vPct.toFixed(1)}%`;
-        fillAudio.style.width = `${aPct.toFixed(1)}%`;
+        // fillVideo.style.width = `${vPct.toFixed(1)}%`;
+        // fillAudio.style.width = `${aPct.toFixed(1)}%`;
+        const tPct = clampPct(info.totalProgress);
+        const tSpeed = info.currentDownloadSpeed ?? '-';
 
+        fillTotal.style.width = `${tPct.toFixed(1)}%`;
+        setField('s-tpct', `${tPct.toFixed(1)}%`);
+        setField('s-speed', tSpeed);
         setField('s-status', state);
         setField('s-total-size', totalSize);
         setField('s-elapsed', fmtElapsed(start));
-        setField('s-vpct', `${vPct.toFixed(1)}%`);
-        setField('s-vsize', vSize);
-        setField('s-vspeed', vSpeed);
-        setField('s-apct', `${aPct.toFixed(1)}%`);
-        setField('s-asize', aSize);
-        setField('s-aspeed', aSpeed);
+        // setField('s-vpct', `${vPct.toFixed(1)}%`);
+        // setField('s-vsize', vSize);
+        // setField('s-apct', `${aPct.toFixed(1)}%`);
+        // setField('s-asize', aSize);
 
         if (DONE_STATES.has(state)) stats.classList.add('state-done');
         if (FAIL_STATES.has(state)) stats.classList.add('state-failed');

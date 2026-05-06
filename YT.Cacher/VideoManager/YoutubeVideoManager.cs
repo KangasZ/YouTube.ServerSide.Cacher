@@ -8,12 +8,14 @@ public class YoutubeVideoManager(CacheManager cacheManager, Downloader downloade
     private DownloadInformation FinishedInformation = new DownloadInformation()
     {
         AudioProgress = 100,
+        TotalProgress = 100,
         VideoProgress = 100,
     };
 
     private DownloadInformation StartedInformation = new DownloadInformation()
     {
         AudioProgress = 0,
+        TotalProgress = 0,
         VideoProgress = 0,
     };
 
