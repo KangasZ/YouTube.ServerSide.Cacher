@@ -3,8 +3,8 @@ namespace YT.Cacher.YTDownloader;
 public class CacheCleanupService(CacheManager cacheManager, ILogger<CacheCleanupService> logger)
     : BackgroundService
 {
-    private static readonly TimeSpan Interval = TimeSpan.FromHours(24);
-    private static readonly TimeSpan MaxAge = TimeSpan.FromHours(24);
+    private static readonly TimeSpan Interval = TimeSpan.FromDays(1);
+    private static readonly TimeSpan MaxAge = TimeSpan.FromDays(7);
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
