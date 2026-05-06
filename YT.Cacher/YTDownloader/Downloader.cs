@@ -106,11 +106,11 @@ public class Downloader
         {
             "--ignore-config",
             $"--cookies {pathManager.CookiesPath}",
-            "-N 8",
+            "-N 16",
             "--audio-quality 0",
-            "-f \"bv*[ext=mp4][height<=1080]+ba[ext=webm]\"",
+            "-f \"bv*[height<=1080]+ba\"",
             $"-o \"{cacheManager.CachePath}%(id)s.%(ext)s\"",
-            "--merge-output-format webm",
+            "-t mp4",
             "--progress-template \"download:[dlstats] kind=%(info.vcodec)s/%(info.acodec)s fid=%(info.format_id)s pct=%(progress._percent_str)s size=%(progress._total_bytes_str)s speed=%(progress._speed_str)s eta=%(progress._eta_str)s\"",
             $"\"https://youtube.com/watch?v={id}\"",
         };

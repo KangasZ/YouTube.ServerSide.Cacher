@@ -21,7 +21,7 @@ public class CacheManager
             return null;
 
         var match = Directory
-            .EnumerateFiles(CachePath, $"{videoId}.webm", SearchOption.TopDirectoryOnly)
+            .EnumerateFiles(CachePath, $"{videoId}.mp4", SearchOption.TopDirectoryOnly)
             .FirstOrDefault();
 
         return match is null ? null : Path.GetFullPath(match);

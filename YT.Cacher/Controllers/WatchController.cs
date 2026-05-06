@@ -25,6 +25,6 @@ public class WatchController(YoutubeVideoManager youtubeVideoManager) : Controll
             return BadRequest();
         }
         Response.Headers.CacheControl = "public, max-age=43200, immutable";
-        return PhysicalFile(cachePath, "video/webm", true);
+        return PhysicalFile(cachePath, "video/mp4", true);
     }
 }
