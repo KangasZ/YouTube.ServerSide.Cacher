@@ -1,4 +1,4 @@
-namespace YT.Cacher.YTDownloader;
+namespace YouTube.ServerSide.Cacher.Models;
 
 public enum StatusEnum
 {

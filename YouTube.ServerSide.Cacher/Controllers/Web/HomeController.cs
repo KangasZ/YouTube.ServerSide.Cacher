@@ -1,7 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
-using YT.Cacher.YTDownloader;
 
-namespace YT.Cacher.Controllers;
+namespace YouTube.ServerSide.Cacher.Controllers.Web;
 
 [ApiController]
 [Route("")]
@@ -12,5 +11,12 @@ public class HomeController(IWebHostEnvironment env) : ControllerBase
     {
         var path = Path.Combine(env.WebRootPath, "HomeIndex.html");
         return PhysicalFile(path, "text/html; charset=utf-8");
+    }
+
+    [HttpGet("/HomeIndex.js")]
+    public IActionResult IndexJs()
+    {
+        var path = Path.Combine(env.WebRootPath, "HomeIndex.js");
+        return PhysicalFile(path, "text/javascript; charset=utf-8");
     }
 }

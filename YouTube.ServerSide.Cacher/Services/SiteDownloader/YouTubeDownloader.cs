@@ -1,126 +1,56 @@
-using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Text;
 using System.Text.RegularExpressions;
+using YouTube.ServerSide.Cacher.Models;
+using YouTube.ServerSide.Cacher.Services.YTDownloader;
+using YouTube.ServerSide.Cacher.YTDownloader;
 
-namespace YT.Cacher.YTDownloader;
+namespace YouTube.ServerSide.Cacher.Services.SiteDownloader;
 
-public record DownloadInformation
+public class YouTubeDownloader(
+    PathManager pathManager,
+    ILogger<YouTubeDownloader> logger,
+    CacheManager cacheManager
+) : ISiteDownloader
 {
-    public DateTime StartTime { get; set; } = DateTime.UtcNow;
-    public string? CurrentDownloadSpeed { get; set; }
-    public string TotalSize { get; set; } = "0B";
-    public double TotalProgress { get; set; }
-    public double VideoProgress { get; set; }
-    public string VideoSize { get; set; } = "0B";
-    public double AudioProgress { get; set; }
-    public string AudioSize { get; set; } = "0B";
-    public StatusEnum Status { get; set; } = StatusEnum.Queued;
-}
-
-public record DownloadEntry(Task<int> Task, DownloadInformation DownloadInformation);
-
-public class Downloader
-{
-    private readonly CacheManager cacheManager;
-    private readonly ILogger<Downloader> logger;
-    private readonly PathManager pathManager;
-    private readonly ConcurrentDictionary<string, DownloadEntry> inFlight = new();
-
-    public Downloader(
-        PathManager pathManager,
-        ILogger<Downloader> logger,
-        CacheManager cacheManager
+    public Task<int> DownloadVideo(
+        DownloadInformation downloadInformation,
+        CancellationToken cancellationToken = default
     )
     {
-        this.pathManager = pathManager;
-        this.logger = logger;
-        this.cacheManager = cacheManager;
-    }
-
-    public Task<int> DownloadVideo(string videoId, CancellationToken cancellationToken = default)
-    {
-        // GetOrAdd ensures only one Task per id is created.
-        var entry = inFlight.GetOrAdd(
-            videoId,
-            _ =>
-            {
-                logger.LogInformation("Queueing new download for {Id}", videoId);
-
-                var stats = new DownloadInformation()
-                {
-                    StartTime = DateTime.UtcNow,
-                    VideoProgress = 0,
-                    AudioProgress = 0,
-                };
-                // Run on background thread so concurrent callers don't share cancellation.
-                var t = Task.Run(
-                    () => DownloadYT(videoId, stats, cancellationToken),
-                    cancellationToken
-                );
-
-                // Remove from dictionary when done (success, fail, or cancel).
-                var a = t.ContinueWith(
-                    completed =>
-                    {
-                        inFlight.TryRemove(videoId, out var p);
-                        logger.LogInformation(
-                            "Download for {Id} finished, removed from in-flight set",
-                            videoId
-                        );
-                    },
-                    TaskScheduler.Default
-                );
-
-                return new DownloadEntry(t, stats);
-            }
-        );
-
-        logger.LogInformation(
-            "Joining download task for {Id} (progress={Status})",
-            videoId,
-            entry.DownloadInformation
-        );
-
-        return entry.Task;
-    }
-
-    public bool TryGetStats(string id, out DownloadInformation? stats)
-    {
-        if (inFlight.TryGetValue(id, out var entry))
-        {
-            stats = entry.DownloadInformation;
-            return true;
-        }
-        stats = null;
-        return false;
+        return DownloadYT(downloadInformation, cancellationToken);
     }
 
     private async Task<int> DownloadYT(
-        string id,
         DownloadInformation information,
         CancellationToken cancellationToken = default
     )
     {
+        var exportPath = cacheManager.GetVideoPath(information.Site, information.SiteId);
         var args = new List<string>
         {
+            $"--js-runtimes deno:\"{pathManager.DenoPath}\"",
             "--ignore-config",
-            $"--cookies {pathManager.CookiesPath}",
             "-N 16",
             "--audio-quality 0",
             "-f \"bv*[height<=1080]+ba\"",
-            $"-o \"{cacheManager.CachePath}%(id)s.%(ext)s\"",
+            $"-o \"{exportPath}\"",
             "-t mp4",
             "--progress-delta 0.5",
             "--progress-template \"download:[dlstats] kind=%(info.vcodec)s/%(info.acodec)s fid=%(info.format_id)s pct=%(progress._percent_str)s size=%(progress._total_bytes_str)s speed=%(progress._speed_str)s eta=%(progress._eta_str)s\"",
-            $"\"https://youtube.com/watch?v={id}\"",
+            $"\"https://youtube.com/watch?v={information.SiteId}\"",
         };
+
+        if (pathManager.CookiesExist)
+        {
+            args.Add($"--cookies {pathManager.CookiesPath}");
+        }
 
         using var ytdlpProcess = new Process
         {
             StartInfo =
             {
-                FileName = pathManager.YtdlPath,
+                FileName = pathManager.YtdlpPath,
                 Arguments = string.Join(" ", args),
                 UseShellExecute = false,
                 RedirectStandardOutput = true,
@@ -167,6 +97,8 @@ public class Downloader
         {
             information.Status = StatusEnum.Success;
         }
+
+        information.EndTime = DateTime.UtcNow;
         return ytdlpProcess.ExitCode;
     }
 
@@ -199,14 +131,10 @@ public class Downloader
         switch (kind)
         {
             case "video":
-                information.VideoProgress = parseSuccess ? pct : 0;
-                information.VideoSize = m.Groups["size"].Value;
                 information.CurrentDownloadSpeed = m.Groups["speed"].Value;
                 information.Status = StatusEnum.DownloadingVideo;
                 break;
             case "audio":
-                information.VideoProgress = parseSuccess ? pct : 0;
-                information.AudioSize = m.Groups["size"].Value;
                 information.CurrentDownloadSpeed = m.Groups["speed"].Value;
                 information.Status = StatusEnum.DownloadingAudio;
                 break;
@@ -217,5 +145,38 @@ public class Downloader
                 information.Status = StatusEnum.Downloading;
                 break;
         }
+    }
+
+    private static readonly Regex VideoIdFormatRegex = new(
+        @"^[A-Za-z0-9_\-]{11}$",
+        RegexOptions.Compiled
+    );
+
+    private static readonly Regex VideoIdQueryRegex = new(
+        @"[?&]v=([A-Za-z0-9_\-]{11})",
+        RegexOptions.Compiled
+    );
+
+    private static readonly Regex VideoIdPathRegex = new(
+        @"(?:youtu\.be/|youtube(?:-nocookie)?\.com/(?:shorts|embed|live|v)/)([A-Za-z0-9_\-]{11})",
+        RegexOptions.Compiled | RegexOptions.IgnoreCase
+    );
+
+    private static string? ExtractVideoId(string url)
+    {
+        var m = VideoIdQueryRegex.Match(url);
+        return m.Success ? m.Groups[1].Value : null;
+    }
+
+    private static string? ExtractVideoIdAlt(string url)
+    {
+        var m = VideoIdPathRegex.Match(url);
+        return m.Success ? m.Groups[1].Value : null;
+    }
+
+    public static string? GetVideoId(string urlOrId)
+    {
+        var id = ExtractVideoId(urlOrId) ?? ExtractVideoIdAlt(urlOrId) ?? urlOrId.Trim();
+        return VideoIdFormatRegex.IsMatch(id) ? id : null;
     }
 }
