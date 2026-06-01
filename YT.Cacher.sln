@@ -1,4 +1,4 @@
-﻿
+
 Microsoft Visual Studio Solution File, Format Version 12.00
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "YouTube.ServerSide.Cacher", "YouTube.ServerSide.Cacher\YouTube.ServerSide.Cacher.csproj", "{F252F37A-8CE6-46C4-B7B9-A2AEDDE85DD1}"
 EndProject
