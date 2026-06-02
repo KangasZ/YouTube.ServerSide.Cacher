@@ -1,6 +1,4 @@
-using YouTube.ServerSide.Cacher.Services.YTDownloader;
-
-namespace YouTube.ServerSide.Cacher.YTDownloader;
+namespace YouTube.ServerSide.Cacher.Services.CacheServices;
 
 public class CacheCleanupService(CacheManager cacheManager, ILogger<CacheCleanupService> logger)
     : BackgroundService

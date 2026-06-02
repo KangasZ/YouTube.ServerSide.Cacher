@@ -1,6 +1,6 @@
 using YouTube.ServerSide.Cacher.Models;
 
-namespace YouTube.ServerSide.Cacher.Services.SiteDownloader;
+namespace YouTube.ServerSide.Cacher.Services.DownloadServices.SiteDownloader;
 
 public interface ISiteDownloader
 {

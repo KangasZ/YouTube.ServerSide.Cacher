@@ -1,18 +1,18 @@
 using System.Collections.Concurrent;
 using YouTube.ServerSide.Cacher.ExtensionMethods;
 using YouTube.ServerSide.Cacher.Models;
-using YouTube.ServerSide.Cacher.Services.SiteDownloader;
-using YouTube.ServerSide.Cacher.Services.YTDownloader;
+using YouTube.ServerSide.Cacher.Services.CacheServices;
+using YouTube.ServerSide.Cacher.Services.DownloadServices.SiteDownloader;
 
-namespace YouTube.ServerSide.Cacher.Services.VideoManager;
+namespace YouTube.ServerSide.Cacher.Services.DownloadServices;
 
 public class DownloadManager
 {
-    private readonly YouTubeDownloader youtubeDownloader;
+    private readonly IYouTubeDownloader youtubeDownloader;
     private readonly ConcurrentDictionary<string, DownloadEntry> Downloads = new();
     private readonly CacheManager cacheManager;
 
-    public DownloadManager(YouTubeDownloader youtubeDownloader, CacheManager cacheManager)
+    public DownloadManager(IYouTubeDownloader youtubeDownloader, CacheManager cacheManager)
     {
         this.cacheManager = cacheManager;
         this.youtubeDownloader = youtubeDownloader;
@@ -33,12 +33,13 @@ public class DownloadManager
         // Check if the download already exists in cache, regardless of downloads
         var fileInformation = cacheManager.GetFileInformation(site, id);
 
-        // If the file does not exist, and theres a download thats older than an hour, assume its bad and remove dl and requeue
+        // If the file does not exist, and theres a download thats in a end state, assume its bad and remove dl and requeue
+        StatusEnum[] finishedStates = [StatusEnum.Cached, StatusEnum.Success, StatusEnum.Failed];
         if (
             fileInformation is null
             && downloadExists
             && downloadValue is not null
-            && downloadValue.DownloadInformation.StartTime < DateTime.UtcNow.AddHours(-1)
+            && finishedStates.Contains(downloadValue.DownloadInformation.Status)
         )
         {
             Downloads.Remove(downloadKey, out _);
@@ -61,7 +62,7 @@ public class DownloadManager
                     EndTime = fileInformation.LastModified,
                     TotalSize = fileInformation.FileSizeInBytes.FormatIntoReaadableBytes(),
                     TotalProgress = 100,
-                    Status = StatusEnum.Success,
+                    Status = StatusEnum.Cached,
                 }
             );
         }

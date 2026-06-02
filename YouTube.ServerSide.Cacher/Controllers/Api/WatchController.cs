@@ -1,8 +1,8 @@
 using Microsoft.AspNetCore.Mvc;
 using YouTube.ServerSide.Cacher.Models;
-using YouTube.ServerSide.Cacher.Services.SiteDownloader;
-using YouTube.ServerSide.Cacher.Services.VideoManager;
-using YouTube.ServerSide.Cacher.Services.YTDownloader;
+using YouTube.ServerSide.Cacher.Services.CacheServices;
+using YouTube.ServerSide.Cacher.Services.DownloadServices;
+using YouTube.ServerSide.Cacher.Services.DownloadServices.SiteDownloader;
 
 namespace YouTube.ServerSide.Cacher.Controllers.Api;
 

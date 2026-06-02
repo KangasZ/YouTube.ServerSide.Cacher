@@ -1,17 +1,20 @@
 using System.Diagnostics;
 using System.Text;
 using System.Text.RegularExpressions;
+using YouTube.ServerSide.Cacher.Configuration;
 using YouTube.ServerSide.Cacher.Models;
-using YouTube.ServerSide.Cacher.Services.YTDownloader;
-using YouTube.ServerSide.Cacher.YTDownloader;
+using YouTube.ServerSide.Cacher.Services.CacheServices;
 
-namespace YouTube.ServerSide.Cacher.Services.SiteDownloader;
+namespace YouTube.ServerSide.Cacher.Services.DownloadServices.SiteDownloader;
+
+public interface IYouTubeDownloader : ISiteDownloader;
 
 public class YouTubeDownloader(
     PathManager pathManager,
     ILogger<YouTubeDownloader> logger,
-    CacheManager cacheManager
-) : ISiteDownloader
+    CacheManager cacheManager,
+    AppSettings appSettings
+) : IYouTubeDownloader
 {
     public Task<int> DownloadVideo(
         DownloadInformation downloadInformation,
@@ -40,6 +43,11 @@ public class YouTubeDownloader(
             "--progress-template \"download:[dlstats] kind=%(info.vcodec)s/%(info.acodec)s fid=%(info.format_id)s pct=%(progress._percent_str)s size=%(progress._total_bytes_str)s speed=%(progress._speed_str)s eta=%(progress._eta_str)s\"",
             $"\"https://youtube.com/watch?v={information.SiteId}\"",
         };
+
+        if (!string.IsNullOrWhiteSpace(appSettings.AdditionalYtDlpArguments.YouTubeArguments))
+        {
+            args.Add(appSettings.AdditionalYtDlpArguments.YouTubeArguments);
+        }
 
         if (pathManager.CookiesExist)
         {

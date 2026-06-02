@@ -1,5 +1,5 @@
-const input = document.getElementById('vid');
-const button = document.getElementById('go');
+
+
 const status = document.getElementById('status');
 const stats = document.getElementById('stats');
 const fill = document.getElementById('fill');
@@ -33,71 +33,77 @@ const TERMINAL_STATES = new Set(['Success', 'Cached', 'Failed', 'Canceled']);
 const DONE_STATES = new Set(['Success', 'Cached']);
 const FAIL_STATES = new Set(['Failed', 'Canceled']);
 
-// const fillVideo = document.getElementById('fill-video');
-// const fillAudio = document.getElementById('fill-audio');
+class DownloadInformation {
+    constructor(response) {
+        this.site = response.site;
+        this.siteId = response.siteId;
+        this.status = response.status ?? '-';
+        this.totalProgress = clampProgressPercent(response.totalProgress);
+        this.totalSize = response.totalSize ?? '-';
+        this.currentDownloadSpeed = response.currentDownloadSpeed ?? '-';
+        this.startTime = response.startTime ?? null;
+        this.endTime = response.endTime ?? null;
+    }
+}
 
-function clampPct(n) {
+function clampProgressPercent(n) {
     const v = typeof n === 'number' ? n : 0;
     return Math.min(100, Math.max(0, v));
 }
 
-function fmtElapsed(startIso) {
-    if (!startIso) return '-';
-    const ms = Date.now() - new Date(startIso).getTime();
+function formatTimeSince(startIso, endIso) {
+    if (!startIso) {
+        return '-';
+    }
+    const endTime = endIso ? new Date(endIso).getTime() : Date.now();
+    const ms = endTime - new Date(startIso).getTime();
     if (!isFinite(ms) || ms < 0) return '-';
     const s = Math.floor(ms / 1000);
     const m = Math.floor(s / 60);
     return m > 0 ? `${m}m ${s % 60}s` : `${s}s`;
 }
 
-function renderStats(info) {
+function renderStats(apiResponse) {
+    console.log("Rendering Stats");
     stats.classList.add('visible');
     stats.classList.remove('state-done', 'state-failed');
 
-    const state = info.status ?? '-';
-    const vPct = clampPct(info.videoProgress);
-    const aPct = clampPct(info.audioProgress);
-    const vSize = info.videoSize ?? '-';
-    const aSize = info.audioSize ?? '-';
-    const totalSize = info.totalSize ?? '-';
-    const start = info.startTime ?? null;
+    const downloadResponse = new DownloadInformation(apiResponse);
 
-    // fillVideo.style.width = `${vPct.toFixed(1)}%`;
-    // fillAudio.style.width = `${aPct.toFixed(1)}%`;
-    const tPct = clampPct(info.totalProgress);
-    const tSpeed = info.currentDownloadSpeed ?? '-';
+    fillTotal.style.width = `${downloadResponse.totalProgress.toFixed(1)}%`;
+    setField('s-tpct', `${downloadResponse.totalProgress.toFixed(1)}%`);
+    setField('s-speed', downloadResponse.currentDownloadSpeed);
+    setField('s-status', downloadResponse.status);
+    setField('s-total-size', downloadResponse.totalSize);
+    setField('s-elapsed', formatTimeSince(downloadResponse.startTime, downloadResponse.endTime));
 
-    fillTotal.style.width = `${tPct.toFixed(1)}%`;
-    setField('s-tpct', `${tPct.toFixed(1)}%`);
-    setField('s-speed', tSpeed);
-    setField('s-status', state);
-    setField('s-total-size', totalSize);
-    setField('s-elapsed', fmtElapsed(start));
-    // setField('s-vpct', `${vPct.toFixed(1)}%`);
-    // setField('s-vsize', vSize);
-    // setField('s-apct', `${aPct.toFixed(1)}%`);
-    // setField('s-asize', aSize);
+    if (DONE_STATES.has(downloadResponse.status)) stats.classList.add('state-done');
+    if (FAIL_STATES.has(downloadResponse.status)) stats.classList.add('state-failed');
 
-    if (DONE_STATES.has(state)) stats.classList.add('state-done');
-    if (FAIL_STATES.has(state)) stats.classList.add('state-failed');
+    return downloadResponse;
 }
 
 async function pollOnce(id) {
     try {
-        const r = await fetch(`/status?v=${encodeURIComponent(id)}`, {method: 'POST'});
+        const r = await fetch(`/api/status/youtube/${encodeURIComponent(id)}`, {method: 'GET'});
         if (r.status === 404) {
             stopPolling();
             return;
         }
-        if (!r.ok) throw new Error(r.statusText);
-        const info = await r.json();
-        renderStats(info);
-        if (TERMINAL_STATES.has(info.status)) stopPolling();
+        if (!r.ok) {
+            throw new Error(r.statusText);
+        }
+        const apiResponse = await r.json();
+        const changedResponse = renderStats(apiResponse);
+        if (TERMINAL_STATES.has(changedResponse.status)) stopPolling();
     } catch (err) {
-        status.textContent = `status error: ${err.message}`;
+        console.log(err);
+        status.textContent = `status error: ${err}`;
         stopPolling();
     }
 }
+
+// Status updates
 
 function startPolling(id) {
     stopPolling();
@@ -112,23 +118,25 @@ function stopPolling() {
     }
 }
 
+// Main submit function
+
 async function submit() {
     const id = extractVideoId(input.value);
     if (!id) {
         status.textContent = 'Invalid video ID or URL';
         return;
     }
-
-    const url = `${window.location.origin}/watch?v=${encodeURIComponent(id)}`;
+    const encodedVideoId = encodeURIComponent(id);
+    const watchUrl = `${window.location.origin}/w/y/${encodedVideoId}`
     try {
-        await navigator.clipboard.writeText(url);
-        status.textContent = `Copied: ${url}`;
+        await navigator.clipboard.writeText(watchUrl);
+        status.textContent = `Copied: ${watchUrl}`;
     } catch {
-        status.textContent = `URL: ${url}`;
+        status.textContent = `URL: ${watchUrl}`;
     }
 
     try {
-        const r = await fetch(`/queue?v=${encodeURIComponent(id)}`, {method: 'POST'});
+        const r = await fetch(`/api/queue/youtube/${encodedVideoId}`, {method: 'GET'});
         if (!r.ok) throw new Error(r.statusText);
         startPolling(id);
     } catch (err) {
@@ -136,19 +144,20 @@ async function submit() {
     }
 }
 
+// Handle button inputs
+
+// GO button
+const button = document.getElementById('buttonGo');
 button.addEventListener('click', submit);
+
+// Input Text Field
+const input = document.getElementById('inputVideoId');
 input.addEventListener('keydown', e => {
     if (e.key === 'Enter') submit();
 });
 
-const pasteBtn = document.getElementById('paste');
-const clearBtn = document.getElementById('clear');
-
-clearBtn.addEventListener('click', () => {
-    input.value = '';
-    input.focus();
-});
-
+// Paste Button
+const pasteBtn = document.getElementById('buttonPaste');
 pasteBtn.addEventListener('click', async () => {
     try {
         const text = await navigator.clipboard.readText();
@@ -157,4 +166,12 @@ pasteBtn.addEventListener('click', async () => {
     } catch (err) {
         status.textContent = `paste error: ${err.message}`;
     }
+});
+
+// Clear Button
+const clearBtn = document.getElementById('buttonClear');
+
+clearBtn.addEventListener('click', () => {
+    input.value = '';
+    input.focus();
 });

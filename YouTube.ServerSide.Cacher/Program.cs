@@ -1,10 +1,9 @@
 using System.Text.Json.Serialization;
 using YouTube.ServerSide.Cacher.Configuration;
 using YouTube.ServerSide.Cacher.Models;
-using YouTube.ServerSide.Cacher.Services.SiteDownloader;
-using YouTube.ServerSide.Cacher.Services.VideoManager;
-using YouTube.ServerSide.Cacher.Services.YTDownloader;
-using YouTube.ServerSide.Cacher.YTDownloader;
+using YouTube.ServerSide.Cacher.Services.CacheServices;
+using YouTube.ServerSide.Cacher.Services.DownloadServices;
+using YouTube.ServerSide.Cacher.Services.DownloadServices.SiteDownloader;
 
 namespace YouTube.ServerSide.Cacher;
 
@@ -29,7 +28,7 @@ public class Program
         builder.Services.AddSingleton<PathManager>();
         builder.Services.AddSingleton<CacheManager>();
         builder.Services.AddHostedService<CacheCleanupService>();
-        builder.Services.AddSingleton<YouTubeDownloader>();
+        builder.Services.AddSingleton<IYouTubeDownloader, YouTubeDownloader>();
 
         builder
             .Services.AddControllers()

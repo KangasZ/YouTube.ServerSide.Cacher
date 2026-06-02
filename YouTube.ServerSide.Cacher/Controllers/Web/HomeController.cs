@@ -10,20 +10,20 @@ public class HomeController(IWebHostEnvironment env) : ControllerBase
     public IActionResult Index()
     {
         var path = Path.Combine(env.WebRootPath, "HomeIndex.html");
-        return PhysicalFile(path, "text/html");
+        return PhysicalFile(path, "text/html; charset=utf-8");
     }
 
     [HttpGet("/HomeIndex.js")]
     public IActionResult IndexJs()
     {
         var path = Path.Combine(env.WebRootPath, "HomeIndex.js");
-        return PhysicalFile(path, "text/javascript");
+        return PhysicalFile(path, "text/javascript; charset=utf-8");
     }
 
     [HttpGet("/HomeIndex.css")]
     public IActionResult IndexCss()
     {
         var path = Path.Combine(env.WebRootPath, "HomeIndex.css");
-        return PhysicalFile(path, "text/css");
+        return PhysicalFile(path, "text/css; charset=utf-8");
     }
 }

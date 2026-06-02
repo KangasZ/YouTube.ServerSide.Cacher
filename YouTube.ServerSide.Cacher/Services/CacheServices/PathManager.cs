@@ -1,6 +1,6 @@
 using YouTube.ServerSide.Cacher.Configuration;
 
-namespace YouTube.ServerSide.Cacher.Services.YTDownloader;
+namespace YouTube.ServerSide.Cacher.Services.CacheServices;
 
 public class PathManager
 {

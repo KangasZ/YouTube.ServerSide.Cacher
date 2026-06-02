@@ -19,4 +19,8 @@
     <ItemGroup>
         <None Include="wwwroot\HomeIndex.html" />
     </ItemGroup>
+
+    <ItemGroup>
+      <Folder Include="cache\YouTube\" />
+    </ItemGroup>
 </Project>

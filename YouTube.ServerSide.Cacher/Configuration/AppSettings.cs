@@ -11,4 +11,10 @@ public class Paths
 public class AppSettings
 {
     public Paths Paths { get; set; } = new Paths();
+    public AdditionalYtDlpArguments  AdditionalYtDlpArguments { get; set; } = new AdditionalYtDlpArguments();
+}
+
+public class AdditionalYtDlpArguments
+{
+    public string YouTubeArguments { get; set; } = string.Empty;
 }
