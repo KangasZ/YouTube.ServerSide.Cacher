@@ -31,10 +31,7 @@ public class Program
         builder.Services.AddSingleton<IYouTubeDownloader, YouTubeDownloader>();
 
         builder
-            .Services.AddControllers()
-            .AddJsonOptions(options =>
-                options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter())
-            );
+            .Services.AddControllers();
 
         var app = builder.Build();
         // Configure the HTTP request pipeline.

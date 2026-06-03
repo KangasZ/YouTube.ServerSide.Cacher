@@ -20,7 +20,11 @@ public class StatusController(DownloadManager downloadManager) : ControllerBase
         {
             return BadRequest();
         }
-        var dlInfo = downloadManager.QueueOrGetDownload(SupportedSites.YouTube, id);
-        return Ok(dlInfo?.DownloadInformation ?? null);
+        var dlInfo = downloadManager.QueueOrGetDownload(SupportedSites.YouTube, id, false);
+        if (dlInfo is null)
+        {
+            return NotFound();
+        }
+        return Ok(dlInfo.DownloadInformation);
     }
 }

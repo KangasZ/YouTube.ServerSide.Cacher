@@ -22,6 +22,10 @@ public class QueueController(DownloadManager downloadManager) : ControllerBase
         }
 
         var dlInfo = downloadManager.QueueOrGetDownload(SupportedSites.YouTube, id);
-        return Accepted(dlInfo?.DownloadInformation ?? null);
+        if (dlInfo == null)
+        {
+            return NotFound();
+        }
+        return Accepted(dlInfo.DownloadInformation);
     }
 }

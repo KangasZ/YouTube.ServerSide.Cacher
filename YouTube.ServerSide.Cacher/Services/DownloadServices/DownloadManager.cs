@@ -18,7 +18,7 @@ public class DownloadManager
         this.youtubeDownloader = youtubeDownloader;
     }
 
-    public DownloadEntry? QueueOrGetDownload(SupportedSites site, string id)
+    public DownloadEntry? QueueOrGetDownload(SupportedSites site, string id, bool shouldQueueIfMissing = true)
     {
         // Grab if there's an existing one
         var downloadKey = GetDownloadKey(site, id);
@@ -68,6 +68,11 @@ public class DownloadManager
         }
 
         // Create or get download task (tbd)
+        if (!shouldQueueIfMissing)
+        {
+            var dl = Downloads.GetValueOrDefault(downloadKey);
+            return dl;
+        }
         var download = Downloads.GetOrAdd(
             downloadKey,
             _ =>
