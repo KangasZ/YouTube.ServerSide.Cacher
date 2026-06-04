@@ -11,7 +11,7 @@ public class StatusTests(WebApplicationFactory<Program> factory) : IntegrationTe
     public async Task GetStatus_NoDownloadFile_ReturnsNotFound()
     {
         var client = ClientWithSiteDownloaderMock();
-        var response = await Act("zhiiOjLgwrM",client);
+        var response = await ActStatus("zhiiOjLgwrM",client);
         Assert.Equal(StatusCodes.Status404NotFound, (int)response.StatusCode);
         Assert.Empty(YouTubeDownloaderMock.downloads);
     }
@@ -23,7 +23,7 @@ public class StatusTests(WebApplicationFactory<Program> factory) : IntegrationTe
         YouTubeDownloaderMock.SetupMock(threadWaitTime: TimeSpan.FromSeconds(5));
         await ActQueue("zhiiOjLgwrM", client);
 
-        var response = await Act("zhiiOjLgwrM", client);
+        var response = await ActStatus("zhiiOjLgwrM", client);
         Assert.Equal(StatusCodes.Status200OK, (int)response.StatusCode);
         Assert.Single(YouTubeDownloaderMock.downloads);
         var responseObject = await response.Content.ReadFromJsonAsync<DownloadInformation>();
@@ -42,7 +42,7 @@ public class StatusTests(WebApplicationFactory<Program> factory) : IntegrationTe
         await ActQueue("zhiiOjLgwrM", client);
         Thread.Sleep(TimeSpan.FromSeconds(1));
 
-        var response = await Act("zhiiOjLgwrM", client);
+        var response = await ActStatus("zhiiOjLgwrM", client);
         Assert.Equal(StatusCodes.Status200OK, (int)response.StatusCode);
         Assert.Single(YouTubeDownloaderMock.downloads);
         var responseObject = await response.Content.ReadFromJsonAsync<DownloadInformation>();
@@ -59,9 +59,9 @@ public class StatusTests(WebApplicationFactory<Program> factory) : IntegrationTe
     public async Task GetStatus_DownloadExistsOnDisk_ReturnsCached_DoesNotQueue()
     {
         var id = "0123456789a";
-        await File.WriteAllBytesAsync($"./cache/YouTube/{id}.mp4", new byte[51200]);
         var client = ClientWithSiteDownloaderMock();
-        var response = await Act(id, client);
+        await CreateDummyVideoFile(id, 51200);
+        var response = await ActStatus(id, client);
         Assert.Equal(StatusCodes.Status200OK, (int)response.StatusCode);
         Assert.Empty(YouTubeDownloaderMock.downloads);
         var responseModel = await response.Content.ReadFromJsonAsync<DownloadInformation>();
@@ -71,17 +71,5 @@ public class StatusTests(WebApplicationFactory<Program> factory) : IntegrationTe
         Assert.Equal(StatusEnum.Cached, responseModel.Status);
         Assert.NotNull(responseModel.EndTime);
         Assert.Equal(51200, responseModel.TotalSize);
-    }
-
-    private async Task<HttpResponseMessage> Act(string id, HttpClient client)
-    {
-        var response = await client.GetAsync($"/api/status/youtube/{id}");
-        return response;
-    }
-
-    private async Task<HttpResponseMessage> ActQueue(string id, HttpClient client)
-    {
-        var response = await client.GetAsync($"/api/queue/youtube/{id}");
-        return response;
     }
 }

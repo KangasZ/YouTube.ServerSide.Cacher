@@ -6,7 +6,7 @@ namespace YouTube.ServerSide.Cacher.Tests.IntegrationTests;
 
 public class YouTubeDownloaderMock(CacheManager cacheManager) : IYouTubeDownloader, IDisposable
 {
-    private List<string> writtenFiles = new List<string>();
+    public List<string> writtenFiles = new List<string>();
     public List<DownloadInformation> downloads = new List<DownloadInformation>();
     private TimeSpan threadWaitTime = TimeSpan.FromSeconds(1);
     private bool shouldMakeFile = true;

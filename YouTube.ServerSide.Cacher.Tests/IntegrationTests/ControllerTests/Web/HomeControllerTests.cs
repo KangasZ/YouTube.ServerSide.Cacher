@@ -21,7 +21,7 @@ public class HomeControllerTests(WebApplicationFactory<Program> factory) : Integ
     public async Task GetFiles_ReturnsRightFile(string url, string mimeType)
     {
         // Arrange
-        var client = Client();
+        var client = ClientWithSiteDownloaderMock();
 
         // Act
         var response = await client.GetAsync(url);
@@ -35,7 +35,7 @@ public class HomeControllerTests(WebApplicationFactory<Program> factory) : Integ
     [Fact]
     public async Task GetIndexHtml_AllReferencedFilesAccessible()
     {
-        var client = Client();
+        var client = ClientWithSiteDownloaderMock();
         var response = await client.GetAsync("/");
         response.EnsureSuccessStatusCode();
         var content = await response.Content.ReadAsStringAsync();

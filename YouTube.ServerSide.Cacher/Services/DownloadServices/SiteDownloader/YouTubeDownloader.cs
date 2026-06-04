@@ -154,6 +154,8 @@ public class YouTubeDownloader(
             return;
         }
 
+        information.Status = StatusEnum.Downloading;
+
         // var codecMatch = CodecRegex.Match(line);
         var progressMatch = ProgressRegex.Match(line);
         var actualSizeMatch = ActualSizeRegex.Match(line);

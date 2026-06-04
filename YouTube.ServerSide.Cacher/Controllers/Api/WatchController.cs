@@ -39,16 +39,17 @@ public class WatchController(DownloadManager downloadManager, CacheManager cache
         }
 
         await downloadEntry.Task;
-        if (downloadEntry.DownloadInformation.Status == StatusEnum.Failed)
+        var filePath = cacheManager.GetVideoPath(
+            downloadEntry.DownloadInformation.Site,
+            downloadEntry.DownloadInformation.SiteId
+        );
+        if (downloadEntry.DownloadInformation.Status == StatusEnum.Failed || !Path.Exists(filePath))
         {
             return Problem();
         }
         Response.Headers.CacheControl = "public, max-age=43200, immutable";
         return PhysicalFile(
-            cacheManager.GetVideoPath(
-                downloadEntry.DownloadInformation.Site,
-                downloadEntry.DownloadInformation.SiteId
-            ),
+            filePath,
             "video/mp4",
             true
         );
