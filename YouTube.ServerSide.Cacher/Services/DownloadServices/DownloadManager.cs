@@ -60,7 +60,7 @@ public class DownloadManager
                     SiteId = id,
                     StartTime = fileInformation.Created,
                     EndTime = fileInformation.LastModified,
-                    TotalSize = fileInformation.FileSizeInBytes.FormatIntoReaadableBytes(),
+                    TotalSize = fileInformation.FileSizeInBytes,
                     TotalProgress = 100,
                     Status = StatusEnum.Cached,
                 }

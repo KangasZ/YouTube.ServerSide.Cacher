@@ -9,9 +9,10 @@ public record DownloadInformation
     public string SiteId { get; set; }
     public DateTime StartTime { get; set; } = DateTime.UtcNow;
     public DateTime? EndTime { get; set; }
-    public string? CurrentDownloadSpeed { get; set; }
-    public string TotalSize { get; set; } = "0B";
+    public double CurrentDownloadSpeed { get; set; }
+    public long TotalSize { get; set; }
     public double TotalProgress { get; set; }
+    public double Eta { get; set; }
     [JsonConverter(typeof(JsonStringEnumConverter))]
     public StatusEnum Status { get; set; } = StatusEnum.Queued;
 }

@@ -24,7 +24,7 @@ public class YouTubeDownloaderMock(CacheManager cacheManager) : IYouTubeDownload
         {
             downloadInformation.Status = StatusEnum.Success;
             downloadInformation.EndTime = DateTime.UtcNow;
-            downloadInformation.TotalSize = "100B";
+            downloadInformation.TotalSize = 100;
             return 0;
         }
         else

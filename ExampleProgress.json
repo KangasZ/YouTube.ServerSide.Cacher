@@ -1,0 +1,41 @@
+{
+    'downloaded_bytes': 2328568,
+    'total_bytes': 2328568,
+    'filename': 'meowmix',
+    'status': 'finished',
+    'elapsed': 1.3737730979919434,
+    'ctx_id': None,
+    'max_progress': None,
+    'progress_idx': None,
+    'speed': 1695016.4502447231,
+    '_speed_str': '1.62MiB/s',
+    '_total_bytes_str': '   2.22MiB',
+    '_elapsed_str': '00:00:01',
+    '_percent': 100.0,
+    '_percent_str': '100.0%',
+    '_default_template': '100% of    2.22MiB in 00:00:01 at 1.62MiB/s'
+}
+
+{
+    'status': 'downloading',
+    'downloaded_bytes': 4455400,
+    'fragment_index': 10,
+    'fragment_count': 12,
+    'filename': 'abc',
+    'tmpfilename': 'abc',
+    'max_progress': None,
+    'progress_idx': None,
+    'elapsed': 1.1779388379945885,
+    'total_bytes_estimate': 4629696.0,
+    'speed': 2679606.8260826156,
+    'eta': 2.3167972507925736,
+    '_eta_str': '00:02',
+    '_speed_str': '   2.56MiB/s',
+    '_percent': 96.23526037130732,
+    '_percent_str': ' 96.2%',
+    '_total_bytes_str': '       N/A',
+    '_total_bytes_estimate_str': '   4.42MiB',
+    '_downloaded_bytes_str': '   4.25MiB',
+    '_elapsed_str': '00:00:01',
+    '_default_template': ' 96.2% of ~   4.42MiB at    2.56MiB/s ETA 00:02 (frag 10/12)'
+}

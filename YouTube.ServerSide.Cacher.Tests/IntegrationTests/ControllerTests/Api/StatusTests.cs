@@ -51,14 +51,26 @@ public class StatusTests(WebApplicationFactory<Program> factory) : IntegrationTe
         Assert.Equal("zhiiOjLgwrM", responseObject.SiteId);
         Assert.Equal(StatusEnum.Success, responseObject.Status);
         Assert.NotNull(responseObject.EndTime);
-        Assert.NotEqual("0B", responseObject.TotalSize);
+        Assert.NotEqual(0, responseObject.TotalSize);
         Assert.NotEqual(100, responseObject.TotalProgress);
     }
 
     [Fact]
-    public async Task GetStatus_DownloadExistsOnDish_ReturnsCached()
+    public async Task GetStatus_DownloadExistsOnDisk_ReturnsCached_DoesNotQueue()
     {
-
+        var id = "0123456789a";
+        await File.WriteAllBytesAsync($"./cache/YouTube/{id}.mp4", new byte[51200]);
+        var client = ClientWithSiteDownloaderMock();
+        var response = await Act(id, client);
+        Assert.Equal(StatusCodes.Status200OK, (int)response.StatusCode);
+        Assert.Empty(YouTubeDownloaderMock.downloads);
+        var responseModel = await response.Content.ReadFromJsonAsync<DownloadInformation>();
+        Assert.NotNull(responseModel);
+        Assert.Equal(SupportedSites.YouTube, responseModel.Site);
+        Assert.Equal(id, responseModel.SiteId);
+        Assert.Equal(StatusEnum.Cached, responseModel.Status);
+        Assert.NotNull(responseModel.EndTime);
+        Assert.Equal(51200, responseModel.TotalSize);
     }
 
     private async Task<HttpResponseMessage> Act(string id, HttpClient client)

@@ -24,12 +24,48 @@ public class YouTubeDownloader(
         return DownloadYT(downloadInformation, cancellationToken);
     }
 
+
+    private static readonly Regex CodecRegex = new(
+        @"codecs=(?<videoCodec>.+?)/(?<audioCodec>.+?)",
+        RegexOptions.Compiled);
+
+    private static readonly Regex ProgressRegex = new(
+        @"progressPercent=(?<progress>.+?)\s",
+        RegexOptions.Compiled);
+
+    private static readonly Regex ActualSizeRegex = new(
+        @"actualSize=(?<actualSize>\d+(?:\.\d+)?)\s",
+        RegexOptions.Compiled);
+
+    private static readonly Regex EstimatedSizeRegex = new(
+        @"estimatedSize=(?<estimatedSize>.+?)\s",
+        RegexOptions.Compiled);
+
+    private static readonly Regex SpeedRegex = new(
+        @"speed=(?<speed>.+?)\s",
+        RegexOptions.Compiled);
+
+    private static readonly Regex EtaRegex = new(
+        @"eta=(?<eta>.+?)\s",
+        RegexOptions.Compiled);
+
+
     private async Task<int> DownloadYT(
         DownloadInformation information,
         CancellationToken cancellationToken = default
     )
     {
         var exportPath = cacheManager.GetVideoPath(information.Site, information.SiteId);
+        var progressTemplate = new List<string>
+        {
+            "download:[customDownloadStats] ",
+            "codecs=%(info.vcodec)s/%(info.acodec)s ",
+            "progressPercent=%(progress._percent)s ",
+            "actualSize=%(progress.total_bytes)s ",
+            "estimatedSize=%(progress.total_bytes_estimate)s ",
+            "speed=%(progress.speed)s ",
+            "eta=%(progress.eta)s "
+        };
         var args = new List<string>
         {
             $"--js-runtimes deno:\"{pathManager.DenoPath}\"",
@@ -40,7 +76,7 @@ public class YouTubeDownloader(
             $"-o \"{exportPath}\"",
             "-t mp4",
             "--progress-delta 0.5",
-            "--progress-template \"download:[dlstats] kind=%(info.vcodec)s/%(info.acodec)s fid=%(info.format_id)s pct=%(progress._percent_str)s size=%(progress._total_bytes_str)s speed=%(progress._speed_str)s eta=%(progress._eta_str)s\"",
+            $"--progress-template \"{string.Join("", progressTemplate)}\"", // full=%(progress)s info=%(info)s\
             $"\"https://youtube.com/watch?v={information.SiteId}\"",
         };
 
@@ -110,48 +146,66 @@ public class YouTubeDownloader(
         return ytdlpProcess.ExitCode;
     }
 
-    private static readonly Regex StatsRegex = new(
-        @"^\[dlstats\]\s+kind=(?<vc>\S+)/(?<ac>\S+)\s+fid=(?<fid>\S+)\s+pct=\s*(?<pct>[\d.]+)%\s+size=\s*(?<size>\S+)\s+speed=\s*(?<speed>\S+)\s+eta=\s*(?<eta>\S+)",
-        RegexOptions.Compiled
-    );
-
     private void ParseStatsFromLine(DownloadInformation information, string line)
     {
-        var m = StatsRegex.Match(line);
-        if (!m.Success)
+
+        if (!line.StartsWith("[customDownloadStats]"))
         {
-            logger.LogDebug("Unhandled stats line: {Line}", line);
             return;
         }
 
-        var kind =
-            m.Groups["vc"].Value == "none" ? "audio"
-            : m.Groups["ac"].Value == "none" ? "video"
-            : "muxed";
+        // var codecMatch = CodecRegex.Match(line);
+        var progressMatch = ProgressRegex.Match(line);
+        var actualSizeMatch = ActualSizeRegex.Match(line);
+        var estimatedSizeMatch = EstimatedSizeRegex.Match(line);
+        var speedMatch = SpeedRegex.Match(line);
+        var etaMatch = EtaRegex.Match(line);
 
-        var parseSuccess = double.TryParse(
-            m.Groups["pct"].Value,
-            System.Globalization.NumberStyles.Float,
-            System.Globalization.CultureInfo.InvariantCulture,
-            out var pct
-        );
 
-        switch (kind)
+        if (progressMatch.Success)
         {
-            case "video":
-                information.CurrentDownloadSpeed = m.Groups["speed"].Value;
-                information.Status = StatusEnum.DownloadingVideo;
-                break;
-            case "audio":
-                information.CurrentDownloadSpeed = m.Groups["speed"].Value;
-                information.Status = StatusEnum.DownloadingAudio;
-                break;
-            case "muxed":
-                information.TotalProgress = parseSuccess ? pct : 0;
-                information.TotalSize = m.Groups["size"].Value;
-                information.CurrentDownloadSpeed = m.Groups["speed"].Value;
-                information.Status = StatusEnum.Downloading;
-                break;
+            var progressStr = progressMatch.Groups["progress"].Value;
+            if (double.TryParse(
+                    progressStr,
+                    out var progressDouble
+                ))
+            {
+                information.TotalProgress = progressDouble;
+            }
+        }
+
+        if (speedMatch.Success)
+        {
+            var  speedStr = speedMatch.Groups["speed"].Value;
+            if (double.TryParse(speedStr, out var speedDouble))
+            {
+                information.CurrentDownloadSpeed = speedDouble;
+            }
+        }
+
+        if (etaMatch.Success)
+        {
+            var etaStr = etaMatch.Groups["eta"].Value;
+            if (double.TryParse(etaStr, out var etaDouble))
+            {
+                information.Eta = etaDouble;
+            }
+        }
+
+        if (actualSizeMatch.Success)
+        {
+            var actualSizeStr = actualSizeMatch.Groups["actualSize"].Value;
+            if (long.TryParse(actualSizeStr, out var actualSizeLong))
+            {
+                information.TotalSize = actualSizeLong;
+            }
+        } else if (estimatedSizeMatch.Success)
+        {
+            var estimatedSizeStr = estimatedSizeMatch.Groups["estimatedSize"].Value;
+            if (double.TryParse(estimatedSizeStr, out var estimatedSizeDouble))
+            {
+                information.TotalSize = (long)estimatedSizeDouble;
+            }
         }
     }
 
