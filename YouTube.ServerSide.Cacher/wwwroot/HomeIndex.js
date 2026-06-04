@@ -1,5 +1,3 @@
-
-
 const status = document.getElementById('status');
 const stats = document.getElementById('stats');
 const fill = document.getElementById('fill');
@@ -25,8 +23,8 @@ function extractVideoId(raw) {
     return null;
 }
 
-function setField(id, value) {
-    document.getElementById(id).textContent = value ?? '-';
+const setField = (id, value) => {
+    document.getElementById(id).textContent = value;
 }
 
 const TERMINAL_STATES = new Set(['Success', 'Cached', 'Failed', 'Canceled']);
@@ -43,15 +41,16 @@ class DownloadInformation {
         this.currentDownloadSpeed = response.currentDownloadSpeed ?? '-';
         this.startTime = response.startTime ?? null;
         this.endTime = response.endTime ?? null;
+        this.eta = response.eta ?? '';
     }
 }
 
-function clampProgressPercent(n) {
+const clampProgressPercent = (n) => {
     const v = typeof n === 'number' ? n : 0;
     return Math.min(100, Math.max(0, v));
 }
 
-function formatTimeSince(startIso, endIso) {
+const formatTimeSince = (startIso, endIso) => {
     if (!startIso) {
         return '-';
     }
@@ -63,7 +62,40 @@ function formatTimeSince(startIso, endIso) {
     return m > 0 ? `${m}m ${s % 60}s` : `${s}s`;
 }
 
-function renderStats(apiResponse) {
+
+/**
+ *     public static string FormatIntoReaadableBytes(this long longBase)
+ *     {
+ *         var numBytes = (double)longBase;
+ *         string[] units = { "B", "KiB", "MiB", "GiB", "TiB" };
+ *         var i = 0;
+ *         while (numBytes >= 1024 && i < units.Length - 1)
+ *         {
+ *             numBytes /= 1024;
+ *             i++;
+ *         }
+ *
+ *         return $"{numBytes:0.##}{units[i]}";
+ *     }
+ * @param bytes
+ * @param size
+ */
+const units = ["B", "KB", "MB", "GB"]
+const numUnits = units.length;
+
+const formatBytes = (bytes, decimals = 1, affix = '') => {
+    let byteNum = Number(bytes);
+    if (Number.isNaN(byteNum)) return '0 ' + units[0] + affix;
+    let i = 0;
+    while (byteNum >= 1024 && i < numUnits - 1) {
+        byteNum = byteNum / 1024;
+        i = i + 1;
+    }
+    byteNum = byteNum.toFixed(decimals);
+    return byteNum + ' ' + units[i] + affix;
+}
+
+const renderStats = (apiResponse) => {
     console.log("Rendering Stats");
     stats.classList.add('visible');
     stats.classList.remove('state-done', 'state-failed');
@@ -71,11 +103,12 @@ function renderStats(apiResponse) {
     const downloadResponse = new DownloadInformation(apiResponse);
 
     fillTotal.style.width = `${downloadResponse.totalProgress.toFixed(1)}%`;
-    setField('s-tpct', `${downloadResponse.totalProgress.toFixed(1)}%`);
-    setField('s-speed', downloadResponse.currentDownloadSpeed);
-    setField('s-status', downloadResponse.status);
-    setField('s-total-size', downloadResponse.totalSize);
-    setField('s-elapsed', formatTimeSince(downloadResponse.startTime, downloadResponse.endTime));
+    setField('stats-progressPercent', `${downloadResponse.totalProgress.toFixed(1)}%`);
+    setField('stats-eta', `${downloadResponse.eta.toFixed(1)}s`);
+    setField('stats-speed', formatBytes(downloadResponse.currentDownloadSpeed, 1, '/s'));
+    setField('stats-statusEnum', downloadResponse.status);
+    setField('stats-size', formatBytes(downloadResponse.totalSize, 1, ''));
+    setField('stats-elapsed', formatTimeSince(downloadResponse.startTime, downloadResponse.endTime));
 
     if (DONE_STATES.has(downloadResponse.status)) stats.classList.add('state-done');
     if (FAIL_STATES.has(downloadResponse.status)) stats.classList.add('state-failed');
@@ -83,7 +116,7 @@ function renderStats(apiResponse) {
     return downloadResponse;
 }
 
-async function pollOnce(id) {
+const pollOnce = async (id) => {
     try {
         const r = await fetch(`/api/status/youtube/${encodeURIComponent(id)}`, {method: 'GET'});
         if (r.status === 404) {
@@ -105,13 +138,13 @@ async function pollOnce(id) {
 
 // Status updates
 
-function startPolling(id) {
+const startPolling = (id) => {
     stopPolling();
     pollOnce(id);
     pollTimer = setInterval(() => pollOnce(id), 1000);
 }
 
-function stopPolling() {
+const stopPolling = () => {
     if (pollTimer) {
         clearInterval(pollTimer);
         pollTimer = null;
@@ -120,7 +153,7 @@ function stopPolling() {
 
 // Main submit function
 
-async function submit() {
+const submit = async () => {
     const id = extractVideoId(input.value);
     if (!id) {
         status.textContent = 'Invalid video ID or URL';
