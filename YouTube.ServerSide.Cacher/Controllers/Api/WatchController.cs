@@ -48,10 +48,6 @@ public class WatchController(DownloadManager downloadManager, CacheManager cache
             return Problem();
         }
         Response.Headers.CacheControl = "public, max-age=43200, immutable";
-        return PhysicalFile(
-            filePath,
-            "video/mp4",
-            true
-        );
+        return PhysicalFile(filePath, "video/mp4", true);
     }
 }

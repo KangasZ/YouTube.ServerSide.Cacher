@@ -1,6 +1,5 @@
 namespace YouTube.ServerSide.Cacher.Models;
 
-
 public enum StatusEnum
 {
     Unknown = -1,

@@ -30,8 +30,7 @@ public class Program
         builder.Services.AddHostedService<CacheCleanupService>();
         builder.Services.AddSingleton<IYouTubeDownloader, YouTubeDownloader>();
 
-        builder
-            .Services.AddControllers();
+        builder.Services.AddControllers();
 
         var app = builder.Build();
         // Configure the HTTP request pipeline.

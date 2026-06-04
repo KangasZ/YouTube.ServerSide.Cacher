@@ -8,7 +8,7 @@ public class WatchTests(WebApplicationFactory<Program> factory) : IntegrationTes
     [Fact]
     public async Task Watch_ReturnMp4_Cached()
     {
-        var id = Guid.NewGuid().ToString().Substring(0,11);
+        var id = Guid.NewGuid().ToString().Substring(0, 11);
         var client = ClientWithSiteDownloaderMock();
         await CreateDummyVideoFile(id, 51200);
         var response = await ActWatch(id, client);
@@ -19,11 +19,9 @@ public class WatchTests(WebApplicationFactory<Program> factory) : IntegrationTes
     }
 
     [Fact]
-
     public async Task Watch_ReturnMp4_AfterAlreadyQueued()
     {
-
-        var id = Guid.NewGuid().ToString().Substring(0,11);
+        var id = Guid.NewGuid().ToString().Substring(0, 11);
         var client = ClientWithSiteDownloaderMock();
         YouTubeDownloaderMock.SetupMock(TimeSpan.FromSeconds(0), true, true);
         var responseQueue = await ActQueue(id, client);
@@ -39,10 +37,9 @@ public class WatchTests(WebApplicationFactory<Program> factory) : IntegrationTes
     }
 
     [Fact]
-
     public async Task Watch_ReturnMp4_FromScratch()
     {
-        var id = Guid.NewGuid().ToString().Substring(0,11);
+        var id = Guid.NewGuid().ToString().Substring(0, 11);
         var client = ClientWithSiteDownloaderMock();
         var response = await ActWatch(id, client);
         Assert.Equal(StatusCodes.Status200OK, (int)response.StatusCode);
@@ -52,10 +49,9 @@ public class WatchTests(WebApplicationFactory<Program> factory) : IntegrationTes
     }
 
     [Fact]
-
     public async Task Watch_DownloadFails_Problem()
     {
-        var id = Guid.NewGuid().ToString().Substring(0,11);
+        var id = Guid.NewGuid().ToString().Substring(0, 11);
         var client = ClientWithSiteDownloaderMock();
         YouTubeDownloaderMock.SetupMock(TimeSpan.FromSeconds(0), false, false);
         var response = await ActWatch(id, client);
@@ -63,19 +59,19 @@ public class WatchTests(WebApplicationFactory<Program> factory) : IntegrationTes
     }
 
     [Fact]
-
     public async Task Watch_DownloadSucceeds_FileDoesNotExist_Problem()
     {
-        var id = Guid.NewGuid().ToString().Substring(0,11);
+        var id = Guid.NewGuid().ToString().Substring(0, 11);
         var client = ClientWithSiteDownloaderMock();
         YouTubeDownloaderMock.SetupMock(TimeSpan.FromSeconds(0), true, false);
         var response = await ActWatch(id, client);
         Assert.Equal(StatusCodes.Status500InternalServerError, (int)response.StatusCode);
     }
+
     [Fact]
     public async Task Watch_ReturnMp4_FromScratch_AfterPreviousDownloadGotDeleted()
     {
-        var id = Guid.NewGuid().ToString().Substring(0,11);
+        var id = Guid.NewGuid().ToString().Substring(0, 11);
         var client = ClientWithSiteDownloaderMock();
         YouTubeDownloaderMock.SetupMock(TimeSpan.FromSeconds(0), true, true);
         var response = await ActWatch(id, client);

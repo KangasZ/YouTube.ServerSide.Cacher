@@ -13,6 +13,7 @@ public record DownloadInformation
     public long TotalSize { get; set; }
     public double TotalProgress { get; set; }
     public double Eta { get; set; }
+
     [JsonConverter(typeof(JsonStringEnumConverter))]
     public StatusEnum Status { get; set; } = StatusEnum.Queued;
 }

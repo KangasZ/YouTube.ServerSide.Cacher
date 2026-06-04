@@ -11,7 +11,11 @@ public class YouTubeDownloaderMock(CacheManager cacheManager) : IYouTubeDownload
     private TimeSpan threadWaitTime = TimeSpan.FromSeconds(1);
     private bool shouldMakeFile = true;
     private bool shouldSucceed = true;
-    public async Task<int> DownloadVideo(DownloadInformation downloadInformation, CancellationToken cancellationToken = default)
+
+    public async Task<int> DownloadVideo(
+        DownloadInformation downloadInformation,
+        CancellationToken cancellationToken = default
+    )
     {
         downloads.Add(downloadInformation);
         Thread.Sleep(threadWaitTime);
@@ -34,10 +38,14 @@ public class YouTubeDownloaderMock(CacheManager cacheManager) : IYouTubeDownload
         }
     }
 
-    public void SetupMock(TimeSpan? threadWaitTime = null, bool? shouldSucceed = null, bool? shouldMakeFile = null)
+    public void SetupMock(
+        TimeSpan? threadWaitTime = null,
+        bool? shouldSucceed = null,
+        bool? shouldMakeFile = null
+    )
     {
-        this.threadWaitTime = threadWaitTime ?? this.threadWaitTime ;
-        this.shouldSucceed = shouldSucceed ?? this.shouldSucceed ;
+        this.threadWaitTime = threadWaitTime ?? this.threadWaitTime;
+        this.shouldSucceed = shouldSucceed ?? this.shouldSucceed;
         this.shouldMakeFile = shouldMakeFile ?? this.shouldMakeFile;
     }
 

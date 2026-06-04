@@ -18,7 +18,11 @@ public class DownloadManager
         this.youtubeDownloader = youtubeDownloader;
     }
 
-    public DownloadEntry? QueueOrGetDownload(SupportedSites site, string id, bool shouldQueueIfMissing = true)
+    public DownloadEntry? QueueOrGetDownload(
+        SupportedSites site,
+        string id,
+        bool shouldQueueIfMissing = true
+    )
     {
         // Grab if there's an existing one
         var downloadKey = GetDownloadKey(site, id);

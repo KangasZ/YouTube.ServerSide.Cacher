@@ -11,7 +11,7 @@ public class StatusTests(WebApplicationFactory<Program> factory) : IntegrationTe
     public async Task GetStatus_NoDownloadFile_ReturnsNotFound()
     {
         var client = ClientWithSiteDownloaderMock();
-        var response = await ActStatus("zhiiOjLgwrM",client);
+        var response = await ActStatus("zhiiOjLgwrM", client);
         Assert.Equal(StatusCodes.Status404NotFound, (int)response.StatusCode);
         Assert.Empty(YouTubeDownloaderMock.downloads);
     }

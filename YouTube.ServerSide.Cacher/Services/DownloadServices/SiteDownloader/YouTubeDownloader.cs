@@ -24,31 +24,29 @@ public class YouTubeDownloader(
         return DownloadYT(downloadInformation, cancellationToken);
     }
 
-
     private static readonly Regex CodecRegex = new(
         @"codecs=(?<videoCodec>.+?)/(?<audioCodec>.+?)",
-        RegexOptions.Compiled);
+        RegexOptions.Compiled
+    );
 
     private static readonly Regex ProgressRegex = new(
         @"progressPercent=(?<progress>.+?)\s",
-        RegexOptions.Compiled);
+        RegexOptions.Compiled
+    );
 
     private static readonly Regex ActualSizeRegex = new(
         @"actualSize=(?<actualSize>\d+(?:\.\d+)?)\s",
-        RegexOptions.Compiled);
+        RegexOptions.Compiled
+    );
 
     private static readonly Regex EstimatedSizeRegex = new(
         @"estimatedSize=(?<estimatedSize>.+?)\s",
-        RegexOptions.Compiled);
+        RegexOptions.Compiled
+    );
 
-    private static readonly Regex SpeedRegex = new(
-        @"speed=(?<speed>.+?)\s",
-        RegexOptions.Compiled);
+    private static readonly Regex SpeedRegex = new(@"speed=(?<speed>.+?)\s", RegexOptions.Compiled);
 
-    private static readonly Regex EtaRegex = new(
-        @"eta=(?<eta>.+?)\s",
-        RegexOptions.Compiled);
-
+    private static readonly Regex EtaRegex = new(@"eta=(?<eta>.+?)\s", RegexOptions.Compiled);
 
     private async Task<int> DownloadYT(
         DownloadInformation information,
@@ -64,7 +62,7 @@ public class YouTubeDownloader(
             "actualSize=%(progress.total_bytes)s ",
             "estimatedSize=%(progress.total_bytes_estimate)s ",
             "speed=%(progress.speed)s ",
-            "eta=%(progress.eta)s "
+            "eta=%(progress.eta)s ",
         };
         var args = new List<string>
         {
@@ -148,7 +146,6 @@ public class YouTubeDownloader(
 
     private void ParseStatsFromLine(DownloadInformation information, string line)
     {
-
         if (!line.StartsWith("[customDownloadStats]"))
         {
             return;
@@ -163,14 +160,10 @@ public class YouTubeDownloader(
         var speedMatch = SpeedRegex.Match(line);
         var etaMatch = EtaRegex.Match(line);
 
-
         if (progressMatch.Success)
         {
             var progressStr = progressMatch.Groups["progress"].Value;
-            if (double.TryParse(
-                    progressStr,
-                    out var progressDouble
-                ))
+            if (double.TryParse(progressStr, out var progressDouble))
             {
                 information.TotalProgress = progressDouble;
             }
@@ -178,7 +171,7 @@ public class YouTubeDownloader(
 
         if (speedMatch.Success)
         {
-            var  speedStr = speedMatch.Groups["speed"].Value;
+            var speedStr = speedMatch.Groups["speed"].Value;
             if (double.TryParse(speedStr, out var speedDouble))
             {
                 information.CurrentDownloadSpeed = speedDouble;
@@ -201,7 +194,8 @@ public class YouTubeDownloader(
             {
                 information.TotalSize = actualSizeLong;
             }
-        } else if (estimatedSizeMatch.Success)
+        }
+        else if (estimatedSizeMatch.Success)
         {
             var estimatedSizeStr = estimatedSizeMatch.Groups["estimatedSize"].Value;
             if (double.TryParse(estimatedSizeStr, out var estimatedSizeDouble))

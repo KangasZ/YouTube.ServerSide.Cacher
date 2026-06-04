@@ -3,16 +3,19 @@ using Microsoft.AspNetCore.Mvc.Testing;
 
 namespace YouTube.ServerSide.Cacher.Tests.IntegrationTests.ControllerTests.Web;
 
-public class HomeControllerTests(WebApplicationFactory<Program> factory) : IntegrationTestBase(factory)
+public class HomeControllerTests(WebApplicationFactory<Program> factory)
+    : IntegrationTestBase(factory)
 {
     // Probably unnecessary :')
     private static readonly Regex LinesInHeaadRegex = new(
-        @"<head>\n(^.*$\n)+</head>"
-        ,RegexOptions.Compiled | RegexOptions.Multiline);
+        @"<head>\n(^.*$\n)+</head>",
+        RegexOptions.Compiled | RegexOptions.Multiline
+    );
 
     private static readonly Regex HrefOrSrcRegex = new(
         @"(?:href=""(.*)"")|(?:src=""(.*)"")",
-        RegexOptions.Compiled | RegexOptions.Multiline);
+        RegexOptions.Compiled | RegexOptions.Multiline
+    );
 
     [Theory]
     [InlineData("/", "text/html")]
@@ -28,8 +31,7 @@ public class HomeControllerTests(WebApplicationFactory<Program> factory) : Integ
 
         // Assert
         response.EnsureSuccessStatusCode();
-        Assert.Equal($"{mimeType}; charset=utf-8",
-            response.Content.Headers.ContentType.ToString());
+        Assert.Equal($"{mimeType}; charset=utf-8", response.Content.Headers.ContentType.ToString());
     }
 
     [Fact]

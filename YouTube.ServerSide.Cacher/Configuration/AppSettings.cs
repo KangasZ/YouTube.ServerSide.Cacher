@@ -11,7 +11,8 @@ public class Paths
 public class AppSettings
 {
     public Paths Paths { get; set; } = new Paths();
-    public AdditionalYtDlpArguments  AdditionalYtDlpArguments { get; set; } = new AdditionalYtDlpArguments();
+    public AdditionalYtDlpArguments AdditionalYtDlpArguments { get; set; } =
+        new AdditionalYtDlpArguments();
 }
 
 public class AdditionalYtDlpArguments

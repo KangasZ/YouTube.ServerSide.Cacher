@@ -32,7 +32,11 @@ public class QueueTests(WebApplicationFactory<Program> factory) : IntegrationTes
     public async Task Queue_VideoAlreadyDownloaded_VideoSinceDeleted_QueuesVideoAgain()
     {
         var client = ClientWithSiteDownloaderMock();
-        YouTubeDownloaderMock.SetupMock(threadWaitTime: TimeSpan.FromSeconds(0), shouldMakeFile:true, shouldSucceed:true);
+        YouTubeDownloaderMock.SetupMock(
+            threadWaitTime: TimeSpan.FromSeconds(0),
+            shouldMakeFile: true,
+            shouldSucceed: true
+        );
         var id = "awaawaawaaa";
         await ActQueue(id, client);
         Thread.Sleep(TimeSpan.FromSeconds(1));

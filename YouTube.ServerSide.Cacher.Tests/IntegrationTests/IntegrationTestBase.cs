@@ -23,14 +23,15 @@ public class IntegrationTestBase : IClassFixture<WebApplicationFactory<Program>>
         {
             builder.ConfigureTestServices(services =>
             {
-                services.AddSingleton<IYouTubeDownloader>(sp =>
-                    new YouTubeDownloaderMock(sp.GetRequiredService<CacheManager>()));
+                services.AddSingleton<IYouTubeDownloader>(sp => new YouTubeDownloaderMock(
+                    sp.GetRequiredService<CacheManager>()
+                ));
             });
         });
 
         var client = factory.CreateClient(); // builds the host
-        YouTubeDownloaderMock = (YouTubeDownloaderMock)factory.Services
-            .GetRequiredService<IYouTubeDownloader>();
+        YouTubeDownloaderMock = (YouTubeDownloaderMock)
+            factory.Services.GetRequiredService<IYouTubeDownloader>();
         return client;
     }
 
