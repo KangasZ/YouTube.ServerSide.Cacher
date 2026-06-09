@@ -9,4 +9,4 @@ steps:
           repo: ${CONF_WP_REGISTRY}/yt-cacher
           registry: ${CONF_WP_REGISTRY}
           tags: latest
-          dockerfile: ./YT.Cacher/Dockerfile
+          dockerfile: ./YouTube.ServerSide.Cacher/Dockerfile

@@ -23,17 +23,17 @@ USER root
 FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
-COPY ["YT.Cacher/YT.Cacher.csproj", "YT.Cacher/"]
-RUN dotnet restore "YT.Cacher/YT.Cacher.csproj"
+COPY ["YouTube.ServerSide.Cacher/YouTube.ServerSide.Cacher.csproj", "YouTube.ServerSide.Cacher/"]
+RUN dotnet restore "YouTube.ServerSide.Cacher/YouTube.ServerSide.Cacher.csproj"
 COPY . .
-WORKDIR "/src/YT.Cacher"
-RUN dotnet build "./YT.Cacher.csproj" -c $BUILD_CONFIGURATION -o /app/build
+WORKDIR "/src/YouTube.ServerSide.Cacher"
+RUN dotnet build "./YouTube.ServerSide.Cacher.csproj" -c $BUILD_CONFIGURATION -o /app/build
 
 FROM build AS publish
 ARG BUILD_CONFIGURATION=Release
-RUN dotnet publish "./YT.Cacher.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
+RUN dotnet publish "./YouTube.ServerSide.Cacher.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
 
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
-ENTRYPOINT ["dotnet", "YT.Cacher.dll"]
+ENTRYPOINT ["dotnet", "YouTube.ServerSide.Cacher.dll"]
