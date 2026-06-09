@@ -133,10 +133,12 @@ public class YouTubeDownloader(
         logger.LogInformation("yt-dlp exited with code {Code}", ytdlpProcess.ExitCode);
         if (ytdlpProcess.ExitCode != 0)
         {
+            information.Eta = 0;
             information.Status = StatusEnum.Failed;
         }
         else
         {
+            information.Eta = 0;
             information.Status = StatusEnum.Success;
         }
 
