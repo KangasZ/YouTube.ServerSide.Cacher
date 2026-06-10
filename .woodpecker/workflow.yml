@@ -8,5 +8,7 @@ steps:
       settings:
           repo: ${CONF_WP_REGISTRY}/yt-cacher
           registry: ${CONF_WP_REGISTRY}
-          tags: latest
+          tags:
+              - latest
+              - ${CI_COMMIT_SHA}
           dockerfile: ./YouTube.ServerSide.Cacher/Dockerfile
