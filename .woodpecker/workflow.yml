@@ -6,12 +6,12 @@ steps:
     -   name: build-cacher
         image: woodpeckerci/plugin-docker-buildx
         settings:
-            repo: ${CONF_WP_REGISTRY}/yt-cacher
-            registry: ${CONF_WP_REGISTRY}
+            repo: ${registry_url}/yt-cacher
+            registry: ${registry_url}
             tags:
                 - latest
                 - ${CI_COMMIT_SHA}
             dockerfile: ./YouTube.ServerSide.Cacher/Dockerfile
         environment:
-            CONF_WP_REGISTRY:
-                CONF_WP_REGISTRY: CONF_WP_REGISTRY
+            registry_url:
+                from_secret: CONF_WP_REGISTRY
