@@ -6,8 +6,10 @@ steps:
     -   name: build-cacher
         image: woodpeckerci/plugin-docker-buildx
         settings:
-            repo: ${CONF_WP_REGISTRY}/yt-cacher
-            registry: ${CONF_WP_REGISTRY}
+            repo:
+                from_secret: wp_registry_repo
+            registry:
+                from_secret: wp_registry
             tags:
                 - latest
                 - ${CI_COMMIT_SHA}
