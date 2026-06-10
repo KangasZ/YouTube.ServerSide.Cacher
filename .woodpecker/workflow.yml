@@ -1,14 +1,17 @@
 when:
-    - event: manual
-      branch: main
+    -   event: manual
+        branch: main
 
 steps:
-    - name: build-cacher
-      image: woodpeckerci/plugin-docker-buildx
-      settings:
-          repo: $${CONF_WP_REGISTRY}/yt-cacher
-          registry: $${CONF_WP_REGISTRY}
-          tags:
-              - latest
-              - ${CI_COMMIT_SHA}
-          dockerfile: ./YouTube.ServerSide.Cacher/Dockerfile
+    -   name: build-cacher
+        image: woodpeckerci/plugin-docker-buildx
+        settings:
+            repo: ${CONF_WP_REGISTRY}/yt-cacher
+            registry: ${CONF_WP_REGISTRY}
+            tags:
+                - latest
+                - ${CI_COMMIT_SHA}
+            dockerfile: ./YouTube.ServerSide.Cacher/Dockerfile
+        environment:
+            CONF_WP_REGISTRY:
+                CONF_WP_REGISTRY: CONF_WP_REGISTRY
