@@ -3,6 +3,7 @@ const stats = document.getElementById('stats');
 const fill = document.getElementById('fill');
 const fillTotal = document.getElementById('fill-total');
 let pollTimer = null;
+let currVideoId = "";
 
 function extractVideoId(raw) {
     const value = raw.trim();
@@ -62,24 +63,6 @@ const formatTimeSince = (startIso, endIso) => {
     return m > 0 ? `${m}m ${s % 60}s` : `${s}s`;
 }
 
-
-/**
- *     public static string FormatIntoReaadableBytes(this long longBase)
- *     {
- *         var numBytes = (double)longBase;
- *         string[] units = { "B", "KiB", "MiB", "GiB", "TiB" };
- *         var i = 0;
- *         while (numBytes >= 1024 && i < units.Length - 1)
- *         {
- *             numBytes /= 1024;
- *             i++;
- *         }
- *
- *         return $"{numBytes:0.##}{units[i]}";
- *     }
- * @param bytes
- * @param size
- */
 const units = ["B", "KB", "MB", "GB"]
 const numUnits = units.length;
 
@@ -159,8 +142,10 @@ const submit = async () => {
         status.textContent = 'Invalid video ID or URL';
         return;
     }
-    const encodedVideoId = encodeURIComponent(id);
-    const watchUrl = `${window.location.origin}/w/y/${encodedVideoId}`
+    currVideoId = encodeURIComponent(id);
+    const watchUrl = `${window.location.origin}/w/y/${currVideoId}`
+    const buttonCopy = document.getElementById("buttonCopyUrl");
+    buttonCopy.hidden = false;
     try {
         await navigator.clipboard.writeText(watchUrl);
         status.textContent = `Copied: ${watchUrl}`;
@@ -169,7 +154,7 @@ const submit = async () => {
     }
 
     try {
-        const r = await fetch(`/api/queue/youtube/${encodedVideoId}`, {method: 'GET'});
+        const r = await fetch(`/api/queue/youtube/${currVideoId}`, {method: 'GET'});
         if (!r.ok) throw new Error(r.statusText);
         startPolling(id);
     } catch (err) {
@@ -178,6 +163,14 @@ const submit = async () => {
 }
 
 // Handle button inputs
+// Copy Button
+const buttonCopy = document.getElementById("buttonCopyUrl");
+buttonCopy.addEventListener('click', () => {
+    if (!currVideoId) return;
+    const watchUrl = `${window.location.origin}/w/y/${currVideoId}`;
+    navigator.clipboard.writeText(watchUrl);
+});
+
 
 // GO button
 const button = document.getElementById('buttonGo');
