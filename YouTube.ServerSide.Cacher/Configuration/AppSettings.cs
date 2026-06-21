@@ -13,9 +13,18 @@ public class AppSettings
     public Paths Paths { get; set; } = new Paths();
     public AdditionalYtDlpArguments AdditionalYtDlpArguments { get; set; } =
         new AdditionalYtDlpArguments();
+    public SponsorBlockSettings SponsorBlock { get; set; } = new SponsorBlockSettings();
 }
 
 public class AdditionalYtDlpArguments
 {
     public string YouTubeArguments { get; set; } = string.Empty;
+}
+
+public class SponsorBlockSettings
+{
+    public bool Enabled { get; set; } = true;
+
+    // https://wiki.sponsor.ajay.app/w/Types#Category
+    public string[] Categories { get; set; } = [];
 }

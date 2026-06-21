@@ -88,6 +88,13 @@ public class YouTubeDownloader(
             args.Add($"--cookies {pathManager.CookiesPath}");
         }
 
+        if (appSettings.SponsorBlock.Enabled)
+        {
+            args.Add(
+                $"--sponsorblock-remove \"{string.Join(",", appSettings.SponsorBlock.Categories)}\""
+            );
+        }
+
         using var ytdlpProcess = new Process
         {
             StartInfo =
