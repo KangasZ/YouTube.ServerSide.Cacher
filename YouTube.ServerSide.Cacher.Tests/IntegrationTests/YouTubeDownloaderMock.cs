@@ -52,7 +52,7 @@ public class YouTubeDownloaderMock(CacheManager cacheManager) : IYouTubeDownload
     public async Task WriteDummyFile(DownloadInformation downloadInformation)
     {
         var path = cacheManager.GetVideoPath(downloadInformation.Site, downloadInformation.SiteId);
-        await File.WriteAllBytesAsync(path, new byte[5000000]);
+        await File.WriteAllBytesAsync(path, new byte[1]);
         writtenFiles.Add(path);
     }
 

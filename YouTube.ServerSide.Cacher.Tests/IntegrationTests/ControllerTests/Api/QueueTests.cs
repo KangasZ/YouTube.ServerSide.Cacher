@@ -20,7 +20,7 @@ public class QueueTests(WebApplicationFactory<Program> factory) : IntegrationTes
     public async Task Queue_SameVideoTwice_ReturnsSuccessSilently()
     {
         var client = ClientWithSiteDownloaderMock();
-        var id = "zhiiOjLgwrM";
+        var id = Guid.NewGuid().ToString().Substring(0, 11);
         var response = await ActQueue(id, client);
         var response2 = await ActQueue(id, client);
         Assert.True(response.IsSuccessStatusCode);
@@ -37,7 +37,7 @@ public class QueueTests(WebApplicationFactory<Program> factory) : IntegrationTes
             shouldMakeFile: true,
             shouldSucceed: true
         );
-        var id = "awaa2aawaa1";
+        var id = Guid.NewGuid().ToString().Substring(0, 11);
         await ActQueue(id, client);
         Thread.Sleep(TimeSpan.FromSeconds(1));
         Assert.True(CheckIfVideoFileExists(id));

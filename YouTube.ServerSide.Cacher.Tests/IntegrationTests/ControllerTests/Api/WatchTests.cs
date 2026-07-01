@@ -87,4 +87,16 @@ public class WatchTests(WebApplicationFactory<Program> factory) : IntegrationTes
         Assert.Equal(5000000, response2.Content.Headers.ContentLength);
         Assert.Equal(2, YouTubeDownloaderMock.downloads.Count);
     }
+
+    [Fact]
+    public async Task Watch_BadInfo_ReturnsBadRequest()
+    {
+        var id = "..%2F1234567";
+        var client = ClientWithSiteDownloaderMock();
+        YouTubeDownloaderMock.writtenFiles.Add($"./cache/YouTube/{id}.mp4");
+        await File.WriteAllBytesAsync($"./cache/1234567.mp4", new byte[10]);
+
+        var response = await ActWatch(id, client);
+        Assert.False(response.IsSuccessStatusCode);
+    }
 }

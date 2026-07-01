@@ -9,7 +9,7 @@ public class CacheManager
     private readonly ILogger<CacheManager>? logger;
     private Dictionary<SupportedSites, string> sitesBasePaths = new();
 
-    public CacheManager(AppSettings appSettings, ILogger<CacheManager>? logger = null)
+    public CacheManager(AppSettings appSettings, ILogger<CacheManager> logger)
     {
         // Dependencies
         this.logger = logger;
@@ -84,39 +84,62 @@ public class CacheManager
         if (!Directory.Exists(CachePath))
             return 0;
 
-        var cutoff = DateTime.UtcNow - maxAge;
-        var deleted = 0;
+        var deleteNewerThan = DateTime.UtcNow - maxAge;
 
-        foreach (
-            var file in Directory.EnumerateFiles(CachePath, "*", SearchOption.TopDirectoryOnly)
-        )
+        try
         {
-            try
-            {
-                var info = new FileInfo(file);
-                // Use the more recent of CreationTime / LastWriteTime as the "downloaded at" timestamp
-                var timestamp =
-                    info.CreationTimeUtc > info.LastWriteTimeUtc
-                        ? info.CreationTimeUtc
-                        : info.LastWriteTimeUtc;
+            CleanupDirectory(CachePath, deleteNewerThan);
+        }
+        catch (Exception e)
+        {
+            logger.LogError("Failed to cleanup base cache directory: {error}", e);
+        }
 
-                if (timestamp < cutoff)
+        var directories = Directory.EnumerateDirectories(CachePath);
+        foreach (var directory in directories)
+        {
+            var directoryinfo = new DirectoryInfo(directory);
+            if (directoryinfo.Attributes.HasFlag(FileAttributes.ReparsePoint))
+            {
+                logger.LogInformation("Not cleaning up directory for it is a link: {name}", directoryinfo.Name);
+            }
+            CleanupDirectory(directory, deleteNewerThan);
+        }
+
+        return 0;
+    }
+
+    // TODO: Add some sane return here.
+    private int CleanupDirectory(string path, DateTime deleteNewerThan)
+    {
+        var files = Directory.EnumerateFiles(path);
+        foreach (var filePath in files)
+        {
+            var fileInfo = new FileInfo(filePath);
+            logger.LogInformation("{name}, {size}, {lastmodified}", fileInfo.Name, fileInfo.Length, fileInfo.LastWriteTimeUtc);
+            if (fileInfo.Attributes.HasFlag(FileAttributes.ReparsePoint))
+            {
+                logger.LogInformation("Not deleting file for it is a link: {name}", fileInfo.Name);
+            }
+            var lastModifiedAt = fileInfo.LastWriteTimeUtc;
+            if (lastModifiedAt < deleteNewerThan)
+            {
+                try
                 {
-                    info.Delete();
-                    deleted++;
-                    logger?.LogInformation(
-                        "Deleted cached video {File} (age {Age})",
-                        info.Name,
-                        DateTime.UtcNow - timestamp
-                    );
+                    fileInfo.Delete();
+                    logger.LogInformation("File deleted: {name} {lastmodified}", fileInfo.Name, fileInfo.LastWriteTimeUtc);
+                }
+                catch (Exception e)
+                {
+                    logger.LogError("Failed to delete file, perhaps it is in use?: {error}", e);
                 }
             }
-            catch (Exception ex)
+            else
             {
-                logger?.LogWarning(ex, "Failed to delete cached file {File}", file);
+                logger.LogInformation("File not deleted: {name} {lastmodified}", fileInfo.Name, fileInfo.LastWriteTimeUtc);
             }
         }
 
-        return deleted;
+        return 0;
     }
 }

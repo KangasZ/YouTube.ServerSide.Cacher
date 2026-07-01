@@ -1,4 +1,5 @@
 using System.Collections.Concurrent;
+using System.Text.RegularExpressions;
 using YouTube.ServerSide.Cacher.ExtensionMethods;
 using YouTube.ServerSide.Cacher.Models;
 using YouTube.ServerSide.Cacher.Services.CacheServices;
@@ -11,6 +12,11 @@ public class DownloadManager
     private readonly IYouTubeDownloader youtubeDownloader;
     private readonly ConcurrentDictionary<string, DownloadEntry> Downloads = new();
     private readonly CacheManager cacheManager;
+
+    private static readonly Regex BadIdRegex = new(
+        @"[\.\/\\]",
+        RegexOptions.Compiled
+    );
 
     public DownloadManager(IYouTubeDownloader youtubeDownloader, CacheManager cacheManager)
     {
@@ -26,6 +32,12 @@ public class DownloadManager
     {
         // Grab if there's an existing one
         var downloadKey = GetDownloadKey(site, id);
+
+        if (BadIdRegex.Match(downloadKey).Success)
+        {
+            throw new ArgumentException("Bad ID");
+        }
+
         // Check if its a valid site
         if (site != SupportedSites.YouTube)
         {
