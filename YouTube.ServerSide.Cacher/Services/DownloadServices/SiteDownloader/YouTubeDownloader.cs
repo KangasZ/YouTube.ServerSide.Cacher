@@ -165,6 +165,7 @@ public class YouTubeDownloader(
         {
             information.EtaArray = new []{0d,0,0,0,0};
             information.Status = StatusEnum.Success;
+            information.TotalSize = cacheManager.GetFileInformation(SupportedSites.YouTube, information.SiteId)?.FileSizeInBytes ?? 0;
         }
 
         information.EndTime = DateTime.UtcNow;
