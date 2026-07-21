@@ -201,3 +201,22 @@ clearBtn.addEventListener('click', () => {
     input.value = '';
     input.focus();
 });
+
+// Quality dropdown
+const qualityDropdown = document.getElementById("qualitydropdown");
+
+const qualityList = [
+    { value: 0, text: "Max (DL may take some time)"},
+    { value: 720, text: "720p"},
+    { value: 1080, text: "1080p"},
+    { value: 1440, text: "1440p"}
+];
+
+qualityList.forEach(quality => {
+    const qualityOption = document.createElement("option");
+    qualityOption.value = quality.value;
+    qualityOption.textContent = quality.text;
+    qualityDropdown.appendChild(qualityOption);
+});
+
+qualityDropdown.selectedIndex = 1;

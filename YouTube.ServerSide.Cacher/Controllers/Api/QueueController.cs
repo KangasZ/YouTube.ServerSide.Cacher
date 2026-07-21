@@ -10,10 +10,29 @@ namespace YouTube.ServerSide.Cacher.Controllers.Api;
 public class QueueController(DownloadManager downloadManager) : ControllerBase
 {
     [HttpGet("youtube/{videoId}")]
-    public IActionResult Queue([FromRoute] string videoId)
+    public IActionResult Queue([FromRoute] string videoId, [FromQuery] int? quality, [FromQuery] bool? forceRedownload)
     {
         if (string.IsNullOrEmpty(videoId))
             return BadRequest();
+        var resultQuality = 0;
+        switch (quality)
+        {
+            case 0:
+            case null:
+                resultQuality = 0;
+                break;
+            case 720:
+                resultQuality = 720;
+                break;
+            case 1080:
+                resultQuality = 1080;
+                break;
+            case 1440:
+                resultQuality = 1440;
+                break;
+            default:
+                return BadRequest();
+        }
 
         var id = YouTubeDownloader.GetVideoId(videoId);
         if (string.IsNullOrEmpty(id))
@@ -21,7 +40,7 @@ public class QueueController(DownloadManager downloadManager) : ControllerBase
             return BadRequest();
         }
 
-        var dlInfo = downloadManager.QueueOrGetDownload(SupportedSites.YouTube, id);
+        var dlInfo = downloadManager.QueueOrGetDownload(SupportedSites.YouTube, id, resultQuality);
         if (dlInfo == null)
         {
             return NotFound();

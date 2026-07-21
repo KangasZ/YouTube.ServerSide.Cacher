@@ -32,7 +32,7 @@ public class WatchController(DownloadManager downloadManager, CacheManager cache
         {
             return BadRequest();
         }
-        var downloadEntry = downloadManager.QueueOrGetDownload(SupportedSites.YouTube, videoId);
+        var downloadEntry = downloadManager.QueueOrGetDownload(SupportedSites.YouTube, videoId, 1080);
         if (downloadEntry == null)
         {
             return NotFound();

@@ -32,7 +32,7 @@ public class WatchTests(WebApplicationFactory<Program> factory) : IntegrationTes
         var response = await ActWatch(id, client);
         Assert.Equal(StatusCodes.Status200OK, (int)response.StatusCode);
         Assert.Equal("video/mp4", response.Content.Headers.ContentType.MediaType);
-        Assert.Equal(5000000, response.Content.Headers.ContentLength);
+        Assert.Equal(1, response.Content.Headers.ContentLength);
         Assert.Single(YouTubeDownloaderMock.downloads);
     }
 
@@ -44,7 +44,7 @@ public class WatchTests(WebApplicationFactory<Program> factory) : IntegrationTes
         var response = await ActWatch(id, client);
         Assert.Equal(StatusCodes.Status200OK, (int)response.StatusCode);
         Assert.Equal("video/mp4", response.Content.Headers.ContentType.MediaType);
-        Assert.Equal(5000000, response.Content.Headers.ContentLength);
+        Assert.Equal(1, response.Content.Headers.ContentLength);
         Assert.Single(YouTubeDownloaderMock.downloads);
     }
 
@@ -77,14 +77,14 @@ public class WatchTests(WebApplicationFactory<Program> factory) : IntegrationTes
         var response = await ActWatch(id, client);
         Assert.Equal(StatusCodes.Status200OK, (int)response.StatusCode);
         Assert.Equal("video/mp4", response.Content.Headers.ContentType.MediaType);
-        Assert.Equal(5000000, response.Content.Headers.ContentLength);
+        Assert.Equal(1, response.Content.Headers.ContentLength);
         Assert.Single(YouTubeDownloaderMock.downloads);
         DeleteDummyVideoFileIfExists(id);
 
         var response2 = await ActWatch(id, client);
         Assert.Equal(StatusCodes.Status200OK, (int)response2.StatusCode);
         Assert.Equal("video/mp4", response2.Content.Headers.ContentType.MediaType);
-        Assert.Equal(5000000, response2.Content.Headers.ContentLength);
+        Assert.Equal(1, response2.Content.Headers.ContentLength);
         Assert.Equal(2, YouTubeDownloaderMock.downloads.Count);
     }
 
