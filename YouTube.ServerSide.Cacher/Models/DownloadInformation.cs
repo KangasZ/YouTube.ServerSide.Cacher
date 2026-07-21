@@ -12,8 +12,16 @@ public record DownloadInformation
     public double CurrentDownloadSpeed { get; set; }
     public long TotalSize { get; set; }
     public double TotalProgress { get; set; }
-    public double Eta { get; set; }
-
+    public double Eta => EtaArray.Average();
+    public int Quality { get; set; } = 1080;
     [JsonConverter(typeof(JsonStringEnumConverter))]
     public StatusEnum Status { get; set; } = StatusEnum.Queued;
+
+    [JsonIgnore]
+    public int EtaCount { get; set; } = 0;
+    [JsonIgnore]
+    public static readonly int ArrayCount = 5;
+
+    [JsonIgnore] public double[] EtaArray { get; set; } = [0d,0,0,0,0];
+
 }

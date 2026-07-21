@@ -27,7 +27,9 @@ public class DownloadManager
     public DownloadEntry? QueueOrGetDownload(
         SupportedSites site,
         string id,
-        bool shouldQueueIfMissing = true
+        int quality,
+        bool shouldQueueIfMissing = true,
+        bool forceRedownload = false
     )
     {
         // Grab if there's an existing one
@@ -79,6 +81,7 @@ public class DownloadManager
                     TotalSize = fileInformation.FileSizeInBytes,
                     TotalProgress = 100,
                     Status = StatusEnum.Cached,
+                    Quality = 0
                 }
             );
         }
@@ -102,6 +105,7 @@ public class DownloadManager
                             Site = site,
                             SiteId = id,
                             StartTime = DateTime.UtcNow,
+                            Quality = quality
                         };
                         task = Task.Run(() => youtubeDownloader.DownloadVideo(downloadInfo));
                         return new DownloadEntry(task, downloadInfo);

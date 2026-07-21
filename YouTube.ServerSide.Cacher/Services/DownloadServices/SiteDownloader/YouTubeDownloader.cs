@@ -54,6 +54,24 @@ public class YouTubeDownloader(
     )
     {
         var exportPath = cacheManager.GetVideoPath(information.Site, information.SiteId);
+        var height = 1080;
+        switch (information.Quality)
+        {
+            case 0:
+                height = 2160;
+                break;
+            case 720:
+            case 1080:
+            case 1440:
+                height = information.Quality;
+                break;
+            default:
+                // Default to 1080
+                height = 1080;
+                break;
+        }
+
+        var format = $"-f \"bv*[height<={height}]+ba\"";
         var progressTemplate = new List<string>
         {
             "download:[customDownloadStats] ",
@@ -70,7 +88,7 @@ public class YouTubeDownloader(
             "--ignore-config",
             "-N 16",
             "--audio-quality 0",
-            "-f \"bv*[height<=1080]+ba\"",
+            format,
             $"-o \"{exportPath}\"",
             "-t mp4",
             "--progress-delta 0.5",
@@ -140,12 +158,12 @@ public class YouTubeDownloader(
         logger.LogInformation("yt-dlp exited with code {Code}", ytdlpProcess.ExitCode);
         if (ytdlpProcess.ExitCode != 0)
         {
-            information.Eta = 0;
+            information.EtaArray = new []{0d,0,0,0,0};
             information.Status = StatusEnum.Failed;
         }
         else
         {
-            information.Eta = 0;
+            information.EtaArray = new []{0d,0,0,0,0};
             information.Status = StatusEnum.Success;
         }
 
@@ -192,7 +210,10 @@ public class YouTubeDownloader(
             var etaStr = etaMatch.Groups["eta"].Value;
             if (double.TryParse(etaStr, out var etaDouble))
             {
-                information.Eta = etaDouble;
+
+                var arrayIndex = information.EtaCount % DownloadInformation.ArrayCount;
+                information.EtaArray[arrayIndex] = etaDouble;
+                information.EtaCount += 1;
             }
         }
 
