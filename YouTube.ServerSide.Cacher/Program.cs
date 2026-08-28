@@ -1,9 +1,12 @@
 using System.Text.Json.Serialization;
+using Microsoft.Extensions.Options;
 using YouTube.ServerSide.Cacher.Configuration;
 using YouTube.ServerSide.Cacher.Models;
+using YouTube.ServerSide.Cacher.Services;
 using YouTube.ServerSide.Cacher.Services.CacheServices;
 using YouTube.ServerSide.Cacher.Services.DownloadServices;
 using YouTube.ServerSide.Cacher.Services.DownloadServices.SiteDownloader;
+using YouTube.ServerSide.Cacher.Services.Protection;
 
 namespace YouTube.ServerSide.Cacher;
 
@@ -14,9 +17,10 @@ public class Program
         var builder = WebApplication.CreateBuilder(args);
 
         // Add configuration
-        var appsettings = new AppSettings();
-        builder.Configuration.Bind(appsettings);
-        builder.Services.AddSingleton<AppSettings>(appsettings);
+        builder.Services.Configure<AppSettings>(builder.Configuration);
+        builder.Services.AddSingleton(sp =>
+            sp.GetRequiredService<IOptions<AppSettings>>().Value);
+
 
         // Add services to the container.
         builder.Services.AddAuthorization();
@@ -29,6 +33,7 @@ public class Program
         builder.Services.AddSingleton<CacheManager>();
         builder.Services.AddHostedService<CacheCleanupService>();
         builder.Services.AddSingleton<IYouTubeDownloader, YouTubeDownloader>();
+        builder.Services.AddSingleton<IProtectionService, ProtectionService>();
 
         builder.Services.AddControllers();
 

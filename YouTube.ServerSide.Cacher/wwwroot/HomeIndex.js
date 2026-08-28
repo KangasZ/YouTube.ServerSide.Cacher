@@ -2,8 +2,18 @@ const status = document.getElementById('status');
 const stats = document.getElementById('stats');
 const fill = document.getElementById('fill');
 const fillTotal = document.getElementById('fill-total');
+const pwInfoContainer = document.getElementById('pwInfoContainer');
 let pollTimer = null;
 let currVideoId = "";
+let protectionEnabled = true;
+let apiKey = "";
+
+const addApiKey = () => {
+    if (protectionEnabled) {
+        return `?apiKey=${apiKey}`;
+    }
+    return "";
+}
 
 function extractVideoId(raw) {
     const value = raw.trim();
@@ -45,6 +55,20 @@ class DownloadInformation {
         this.eta = response.eta ?? '';
     }
 }
+
+class LoginResponse {
+    constructor(response) {
+        this.token = response.token;
+        this.cookie = response.cookie;
+    }
+}
+class GetLoginResponse {
+    constructor(response) {
+        this.authenticated = response.authenticated;
+        this.enabled = response.enabled;
+    }
+}
+
 
 const clampProgressPercent = (n) => {
     const v = typeof n === 'number' ? n : 0;
@@ -101,7 +125,7 @@ const renderStats = (apiResponse) => {
 
 const pollOnce = async (id) => {
     try {
-        const r = await fetch(`/api/status/youtube/${encodeURIComponent(id)}`, {method: 'GET'});
+        const r = await fetch(`/api/status/youtube/${encodeURIComponent(id)}${addApiKey()}`, {method: 'GET'});
         if (r.status === 404) {
             stopPolling();
             return;
@@ -143,18 +167,18 @@ const submit = async () => {
         return;
     }
     currVideoId = encodeURIComponent(id);
-    const watchUrl = `${window.location.origin}/w/y/${currVideoId}`
+    const watchUrl = `${window.location.origin}/w/y/${currVideoId}${addApiKey()}`;
     const buttonCopy = document.getElementById("buttonCopyUrl");
     buttonCopy.hidden = false;
     try {
         await navigator.clipboard.writeText(watchUrl);
-        status.textContent = `Copied: ${watchUrl}`;
+        status.textContent = `Copied URL`;
     } catch {
-        status.textContent = `URL: ${watchUrl}`;
+        status.textContent = `Failed To Copy URL: ${watchUrl}`;
     }
 
     try {
-        const r = await fetch(`/api/queue/youtube/${currVideoId}`, {method: 'GET'});
+        const r = await fetch(`/api/queue/youtube/${currVideoId}${addApiKey()}`, {method: 'GET'});
         if (!r.ok) throw new Error(r.statusText);
         startPolling(id);
     } catch (err) {
@@ -167,7 +191,7 @@ const submit = async () => {
 const buttonCopy = document.getElementById("buttonCopyUrl");
 buttonCopy.addEventListener('click', () => {
     if (!currVideoId) return;
-    const watchUrl = `${window.location.origin}/w/y/${currVideoId}`;
+    const watchUrl = `${window.location.origin}/w/y/${currVideoId}${addApiKey()}`;
     navigator.clipboard.writeText(watchUrl);
 });
 
@@ -220,3 +244,62 @@ qualityList.forEach(quality => {
 });
 
 qualityDropdown.selectedIndex = 1;
+
+
+// Protection Stuff
+
+(async () => {
+    try {
+        const response = await fetch(`/api/login`, { method: 'GET' });
+        if (!response.ok) throw new Error(response.statusText);
+        const apiResponse = await response.json();
+        const getResponse = new GetLoginResponse(apiResponse);
+        if (apiResponse.enabled === false) {
+            const pwContainer = document.getElementById("passwordContainer");
+            pwContainer.style.display = "none";
+            protectionEnabled = false;
+            pwInfoContainer.textContent = "No password. Consider enabling one.";
+        } else if (apiResponse.authenticated) {
+            pwInfoContainer.textContent = "User authenticated, attempting to get api token...";
+            await submitPassword();
+        }
+    } catch (err) {
+        pwInfoContainer.textContent = "Something went wrong. Contact the host.";
+        console.log(err);
+    }
+})();
+
+// Submit Password
+const submitPassword = async () => {
+    const passwordContainer = document.getElementById("password");
+    const password = passwordContainer.value;
+    try {
+        const passwordRequest = {
+            password: password,
+        }
+        const response = await fetch(`/api/login`, {
+            method: 'POST',
+            body: JSON.stringify(passwordRequest),
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            credentials: "include"
+        });
+        if (!response.ok) throw new Error(response.statusText);
+        const jsonResponse = await response.json();
+        const loginResponse = new LoginResponse(jsonResponse);
+        if (!!loginResponse.token) {
+            apiKey = loginResponse.token;
+            const pwContainer = document.getElementById("passwordContainer");
+            pwContainer.style.display = "none";
+        }
+        pwInfoContainer.textContent = "Password accepted, you are logged in.";
+    } catch (err) {
+        console.log(err);
+        pwInfoContainer.textContent = "Your password was not accepted";
+    }
+}
+// Passwrod go button
+const passwordGo = document.getElementById('passwordGo');
+passwordGo.addEventListener('click', submitPassword);
+

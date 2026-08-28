@@ -3,6 +3,7 @@ using YouTube.ServerSide.Cacher.Models;
 using YouTube.ServerSide.Cacher.Services.CacheServices;
 using YouTube.ServerSide.Cacher.Services.DownloadServices;
 using YouTube.ServerSide.Cacher.Services.DownloadServices.SiteDownloader;
+using YouTube.ServerSide.Cacher.Services.Protection;
 
 namespace YouTube.ServerSide.Cacher.Controllers.Api;
 
@@ -10,12 +11,14 @@ namespace YouTube.ServerSide.Cacher.Controllers.Api;
 public class WatchController(DownloadManager downloadManager, CacheManager cacheManager)
     : ControllerBase
 {
+    [RequiredApiKey]
     [HttpGet("/api/watch/youtube/{videoId}")]
     public async Task<IActionResult> Watch([FromRoute] string videoId)
     {
         return await WatchBase(videoId);
     }
 
+    [RequiredApiKey]
     [HttpGet("/w/y/{videoId}")]
     public async Task<IActionResult> WatchUX([FromRoute] string videoId)
     {

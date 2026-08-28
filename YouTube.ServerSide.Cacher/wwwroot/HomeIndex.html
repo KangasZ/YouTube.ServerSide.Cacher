@@ -9,6 +9,16 @@
 <body>
 <div class="wrapper">
     <div class="container">
+        <h1>YT Cacher</h1>
+    </div>
+    <div class="container" id="passwordContainer">
+        <div style="align-self: center;">Password</div>
+        <input id="password" type="text" name="password" placeholder="Enter Password" />
+        <button id="passwordGo">Enter</button>
+    </div>
+    <div class="container" id="pwInfoContainer">
+    </div>
+    <div class="container">
         <button id="buttonClear" class="danger" title="Clear input">Clear</button>
         <button id="buttonPaste" title="Paste from clipboard">Paste</button>
         <input id="inputVideoId" type="text" placeholder="YouTube video ID or URL" autofocus/>
@@ -19,7 +29,7 @@
     </div>
     <div class="container">
         <div id="status"></div>
-        <button hidden id="buttonCopyUrl">Copy Link</button>
+        <button hidden id="buttonCopyUrl">Copy URL (again)</button>
     </div>
     <div id="stats">
         <div class="row">

@@ -40,13 +40,41 @@ The app is designed to run under docker, however should have no worries running 
 
 The dockerfile installs the latest Deno and yt-dlp, then whatever ffmpeg package was most recent on ubuntu (which I believe the dotnet base image is based off). Do not that dockerbuilds will contact github for that info on yt-dlp.
 
-### Reverse Proxy
+## Security
+
+There is an optional protection package. I would highly recommend enabling this, for your own safety.
+
+The way it works is designed for vr chat and not the safest as it puts the api key in the query, however this was done specifically to allow cookie-less authentication for users.
+
+1. Server owner sets a password
+2. That password can be used by users on the webui to obtain a persistant token
+3. The persistant token is needed to create a apitoken
+
+Notes:
+1. The persistant token lasts for many days, and will refresh each time you view the site
+2. The api token is shorter lived
+
+### Setup
+
+1.Generate two different signing keys and put them in your environment variables. Note that the algorithm used requires a certain length of key. Generate with any method (ie: `openssl rand -hex 32`)
+
+| Variable                     | Value          |
+|------------------------------|----------------|
+| Protection__ApiSigningKey    | random value 1 |
+| Protection__CookieSigningKey | random value 2 |
+
+2. Set a password. This should be secure. If it is not particularly secure, put it behind a service like fail2ban.
+
+## Reverse Proxy
 
 Considerations:
 - Reverse proxies may block large file transfers by default, make sure it does. Nginx has no limit on outbound files by default.
 - Reverse proxies may have gateway timeouts if no response is sent. In the case of this app, while yt-dlp downloads the video, it will not be sending any information to the client. You may want to add a larger timeout to your proxy.
 - You can setup a cache on your proxy such that videos are served from NGINX rather than .NET, however it's unclear how much of a benefit this is.
+- A good safety net includes fail2ban or something similar on the `POST /api/login` endpoint
 
 ## Self-Notes
 
 This is hosted both on my personal git server and on github. to push to both, use `git push github && git push gitea`
+
+Update integration tests to support protection and new endpoints

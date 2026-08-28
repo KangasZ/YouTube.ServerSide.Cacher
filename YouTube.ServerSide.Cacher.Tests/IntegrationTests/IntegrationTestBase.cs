@@ -1,6 +1,7 @@
 using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.AspNetCore.TestHost;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using YouTube.ServerSide.Cacher.Services.CacheServices;
 using YouTube.ServerSide.Cacher.Services.DownloadServices.SiteDownloader;
@@ -21,6 +22,17 @@ public class IntegrationTestBase : IClassFixture<WebApplicationFactory<Program>>
     {
         var factory = applicationFactory.WithWebHostBuilder(builder =>
         {
+            builder.ConfigureAppConfiguration((context, config) =>
+            {
+                config.AddInMemoryCollection(new Dictionary<string, string?>
+                {
+                    ["Protection:Enabled"] = "false",
+                    ["Protection:Password"] = "test-password",
+                    ["Protection:ApiSigningKey"] = "test-signing-key",
+                    ["Protection:CookieSigningKey"] = "test-cookie-key"
+                });
+            });
+
             builder.ConfigureTestServices(services =>
             {
                 services.AddSingleton<IYouTubeDownloader>(sp => new YouTubeDownloaderMock(

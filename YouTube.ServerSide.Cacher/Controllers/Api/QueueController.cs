@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using YouTube.ServerSide.Cacher.Models;
 using YouTube.ServerSide.Cacher.Services.DownloadServices;
 using YouTube.ServerSide.Cacher.Services.DownloadServices.SiteDownloader;
+using YouTube.ServerSide.Cacher.Services.Protection;
 
 namespace YouTube.ServerSide.Cacher.Controllers.Api;
 
@@ -9,6 +10,7 @@ namespace YouTube.ServerSide.Cacher.Controllers.Api;
 [Route("api/queue")]
 public class QueueController(DownloadManager downloadManager) : ControllerBase
 {
+    [RequiredApiKey]
     [HttpGet("youtube/{videoId}")]
     public IActionResult Queue([FromRoute] string videoId, [FromQuery] int? quality, [FromQuery] bool? forceRedownload)
     {

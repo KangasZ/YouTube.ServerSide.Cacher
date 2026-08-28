@@ -14,6 +14,7 @@ public class AppSettings
     public AdditionalYtDlpArguments AdditionalYtDlpArguments { get; set; } =
         new AdditionalYtDlpArguments();
     public SponsorBlockSettings SponsorBlock { get; set; } = new SponsorBlockSettings();
+    public Protection Protection { get; set; } = new Protection();
 }
 
 public class AdditionalYtDlpArguments
@@ -27,4 +28,11 @@ public class SponsorBlockSettings
 
     // https://wiki.sponsor.ajay.app/w/Types#Category
     public string[] Categories { get; set; } = [];
+}
+
+public class Protection {
+    public bool Enabled { get; set; } = true;
+    public string Password { get; set; } = string.Empty;
+    public string ApiSigningKey { get; set; } = string.Empty;
+    public string CookieSigningKey { get; set; } = string.Empty;
 }
