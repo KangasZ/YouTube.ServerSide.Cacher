@@ -29,7 +29,8 @@ public class DownloadManager
         string id,
         int quality,
         bool shouldQueueIfMissing = true,
-        bool forceRedownload = false
+        bool forceRedownload = false,
+        string? token = null
     )
     {
         // Grab if there's an existing one
@@ -47,6 +48,10 @@ public class DownloadManager
         }
         // Get downloads key
         var downloadExists = Downloads.TryGetValue(downloadKey, out var downloadValue);
+
+        // Refresh token on any existing entry, regardless of later branching
+        if (downloadExists && downloadValue is not null && shouldQueueIfMissing)
+            downloadValue.DownloadInformation.Token = token;
 
         // Check if the download already exists in cache, regardless of downloads
         var fileInformation = cacheManager.GetFileInformation(site, id);
@@ -81,7 +86,8 @@ public class DownloadManager
                     TotalSize = fileInformation.FileSizeInBytes,
                     TotalProgress = 100,
                     Status = StatusEnum.Cached,
-                    Quality = 0
+                    Quality = 0,
+                    Token = token
                 }
             );
         }
@@ -105,7 +111,8 @@ public class DownloadManager
                             Site = site,
                             SiteId = id,
                             StartTime = DateTime.UtcNow,
-                            Quality = quality
+                            Quality = quality,
+                            Token = token
                         };
                         task = Task.Run(() => youtubeDownloader.DownloadVideo(downloadInfo));
                         return new DownloadEntry(task, downloadInfo);

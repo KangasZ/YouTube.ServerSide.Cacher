@@ -8,9 +8,9 @@ namespace YouTube.ServerSide.Cacher.Controllers.Api;
 
 [ApiController]
 [Route("api/queue")]
-public class QueueController(DownloadManager downloadManager) : ControllerBase
+public class QueueController(DownloadManager downloadManager, IProtectionService protectionService) : ControllerBase
 {
-    [RequiredApiKey]
+    [RequiredCookie]
     [HttpGet("youtube/{videoId}")]
     public IActionResult Queue([FromRoute] string videoId, [FromQuery] int? quality, [FromQuery] bool? forceRedownload)
     {
@@ -42,7 +42,13 @@ public class QueueController(DownloadManager downloadManager) : ControllerBase
             return BadRequest();
         }
 
-        var dlInfo = downloadManager.QueueOrGetDownload(SupportedSites.YouTube, id, resultQuality);
+        string? token = null;
+        if (protectionService.IsEnabled())
+        {
+            token = protectionService.GenerateApiKey(SupportedSites.YouTube, id);
+        }
+
+        var dlInfo = downloadManager.QueueOrGetDownload(SupportedSites.YouTube, id, resultQuality, token: token);
         if (dlInfo == null)
         {
             return NotFound();

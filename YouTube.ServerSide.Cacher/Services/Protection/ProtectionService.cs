@@ -3,6 +3,7 @@ using System.Security.Claims;
 using System.Text;
 using Microsoft.IdentityModel.Tokens;
 using YouTube.ServerSide.Cacher.Configuration;
+using YouTube.ServerSide.Cacher.Models;
 using JwtRegisteredClaimNames = Microsoft.IdentityModel.JsonWebTokens.JwtRegisteredClaimNames;
 
 namespace YouTube.ServerSide.Cacher.Services.Protection;
@@ -11,7 +12,7 @@ public interface IProtectionService
 {
     public bool IsEnabled();
     public bool ValidatePassword(string password);
-    public string GenerateApiKey();
+    public string GenerateApiKey(SupportedSites site, string id);
     public bool ValidateApiKey(string apiKey);
     public string GenerateHashedKey();
     public bool ValidateHashedKey(string hashedKey);
@@ -46,14 +47,16 @@ public class ProtectionService :IProtectionService
 
     public bool ValidatePassword(string password) => password == appSettings.Protection.Password;
 
-    public string GenerateApiKey()
+    public string GenerateApiKey(SupportedSites site, string id)
     {
         var key = new SymmetricSecurityKey(apiKey);
         var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
         var claims = new[]
         {
-            new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
+            new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+            new Claim(JwtRegisteredClaimNames.Name, id),
+            new Claim(JwtRegisteredClaimNames.Address, site.ToString())
         };
 
         var token = new JwtSecurityToken(issuer: Issuer,

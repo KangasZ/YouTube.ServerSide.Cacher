@@ -12,13 +12,6 @@ public class WatchController(DownloadManager downloadManager, CacheManager cache
     : ControllerBase
 {
     [RequiredApiKey]
-    [HttpGet("/api/watch/youtube/{videoId}")]
-    public async Task<IActionResult> Watch([FromRoute] string videoId)
-    {
-        return await WatchBase(videoId);
-    }
-
-    [RequiredApiKey]
     [HttpGet("/w/y/{videoId}")]
     public async Task<IActionResult> WatchUX([FromRoute] string videoId)
     {
@@ -35,7 +28,7 @@ public class WatchController(DownloadManager downloadManager, CacheManager cache
         {
             return BadRequest();
         }
-        var downloadEntry = downloadManager.QueueOrGetDownload(SupportedSites.YouTube, videoId, 1080);
+        var downloadEntry = downloadManager.QueueOrGetDownload(SupportedSites.YouTube, videoId, 1080, shouldQueueIfMissing: false);
         if (downloadEntry == null)
         {
             return NotFound();

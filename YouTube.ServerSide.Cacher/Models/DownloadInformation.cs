@@ -4,6 +4,7 @@ namespace YouTube.ServerSide.Cacher.Models;
 
 public record DownloadInformation
 {
+    public string? Token { get; set; }
     [JsonConverter(typeof(JsonStringEnumConverter))]
     public SupportedSites Site { get; set; }
     public string SiteId { get; set; }

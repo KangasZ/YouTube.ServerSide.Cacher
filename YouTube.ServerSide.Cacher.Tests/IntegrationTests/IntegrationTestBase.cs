@@ -61,7 +61,7 @@ public class IntegrationTestBase : IClassFixture<WebApplicationFactory<Program>>
 
     internal async Task<HttpResponseMessage> ActWatch(string id, HttpClient client)
     {
-        var response = await client.GetAsync($"/api/watch/youtube/{id}");
+        var response = await client.GetAsync($"/w/y/{id}");
         return response;
     }
 

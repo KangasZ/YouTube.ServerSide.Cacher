@@ -45,7 +45,7 @@ public class LoginController(IProtectionService protectionService, ILogger<Login
                     SameSite = SameSiteMode.Strict,
                     Expires = DateTimeOffset.UtcNow.AddDays(60)
                 });
-                return Ok(loginResponse);
+                return Ok();
             }
         }
 
@@ -61,7 +61,7 @@ public class LoginController(IProtectionService protectionService, ILogger<Login
                     SameSite = SameSiteMode.Strict,
                     Expires = DateTimeOffset.UtcNow.AddDays(60)
                 });
-                return Ok(loginResponse);
+                return Ok();
             }
         }
 
@@ -71,10 +71,8 @@ public class LoginController(IProtectionService protectionService, ILogger<Login
     private LoginResponse GetLoginResponse()
     {
         var cookie = protectionService.GenerateHashedKey();
-        var apiKey = protectionService.GenerateApiKey();
         return new LoginResponse()
         {
-            Token =  apiKey,
             Cookie = cookie,
         };
     }
@@ -82,7 +80,6 @@ public class LoginController(IProtectionService protectionService, ILogger<Login
 
 public record LoginResponse
 {
-    public required string Token { get; init; }
     public required string Cookie { get; init; }
 }
 

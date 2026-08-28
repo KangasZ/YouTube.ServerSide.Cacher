@@ -6,11 +6,11 @@ const pwInfoContainer = document.getElementById('pwInfoContainer');
 let pollTimer = null;
 let currVideoId = "";
 let protectionEnabled = true;
-let apiKey = "";
+let watchUrl = "";
 
-const addApiKey = () => {
-    if (protectionEnabled) {
-        return `?apiKey=${apiKey}`;
+const addApiKey = (key) => {
+    if (protectionEnabled && key) {
+        return `?apiKey=${key}`;
     }
     return "";
 }
@@ -44,6 +44,7 @@ const FAIL_STATES = new Set(['Failed', 'Canceled']);
 
 class DownloadInformation {
     constructor(response) {
+        this.token = response.token;
         this.site = response.site;
         this.siteId = response.siteId;
         this.status = response.status ?? '-';
@@ -123,9 +124,9 @@ const renderStats = (apiResponse) => {
     return downloadResponse;
 }
 
-const pollOnce = async (id) => {
+const pollOnce = async (id, key) => {
     try {
-        const r = await fetch(`/api/status/youtube/${encodeURIComponent(id)}${addApiKey()}`, {method: 'GET'});
+        const r = await fetch(`/api/status/youtube/${encodeURIComponent(id)}${addApiKey(key)}`, {method: 'GET'});
         if (r.status === 404) {
             stopPolling();
             return;
@@ -145,10 +146,10 @@ const pollOnce = async (id) => {
 
 // Status updates
 
-const startPolling = (id) => {
+const startPolling = (id, apiKey) => {
     stopPolling();
-    pollOnce(id);
-    pollTimer = setInterval(() => pollOnce(id), 1000);
+    pollOnce(id, apiKey);
+    pollTimer = setInterval(() => pollOnce(id, apiKey), 1000);
 }
 
 const stopPolling = () => {
@@ -166,21 +167,26 @@ const submit = async () => {
         status.textContent = 'Invalid video ID or URL';
         return;
     }
-    currVideoId = encodeURIComponent(id);
-    const watchUrl = `${window.location.origin}/w/y/${currVideoId}${addApiKey()}`;
-    const buttonCopy = document.getElementById("buttonCopyUrl");
-    buttonCopy.hidden = false;
-    try {
-        await navigator.clipboard.writeText(watchUrl);
-        status.textContent = `Copied URL`;
-    } catch {
-        status.textContent = `Failed To Copy URL: ${watchUrl}`;
-    }
 
+
+    currVideoId = encodeURIComponent(id);
     try {
-        const r = await fetch(`/api/queue/youtube/${currVideoId}${addApiKey()}`, {method: 'GET'});
+        const r = await fetch(`/api/queue/youtube/${currVideoId}`, {method: 'GET', credentials: "include"});
         if (!r.ok) throw new Error(r.statusText);
-        startPolling(id);
+
+        const responseJson = await r.json();
+        const downloadResponse = new DownloadInformation(responseJson);
+
+        startPolling(id, downloadResponse.token);
+        watchUrl = `${window.location.origin}/w/y/${currVideoId}${addApiKey(downloadResponse.token)}`;
+        const buttonCopy = document.getElementById("buttonCopyUrl");
+        buttonCopy.hidden = false;
+        try {
+            await navigator.clipboard.writeText(watchUrl);
+            status.textContent = `Copied URL`;
+        } catch {
+            status.textContent = `Failed To Copy URL: ${watchUrl}`;
+        }
     } catch (err) {
         status.textContent += ` (queue error: ${err.message})`;
     }
@@ -191,7 +197,6 @@ const submit = async () => {
 const buttonCopy = document.getElementById("buttonCopyUrl");
 buttonCopy.addEventListener('click', () => {
     if (!currVideoId) return;
-    const watchUrl = `${window.location.origin}/w/y/${currVideoId}${addApiKey()}`;
     navigator.clipboard.writeText(watchUrl);
 });
 
@@ -286,13 +291,8 @@ const submitPassword = async () => {
             credentials: "include"
         });
         if (!response.ok) throw new Error(response.statusText);
-        const jsonResponse = await response.json();
-        const loginResponse = new LoginResponse(jsonResponse);
-        if (!!loginResponse.token) {
-            apiKey = loginResponse.token;
-            const pwContainer = document.getElementById("passwordContainer");
-            pwContainer.style.display = "none";
-        }
+        const pwContainer = document.getElementById("passwordContainer");
+        pwContainer.style.display = "none";
         pwInfoContainer.textContent = "Password accepted, you are logged in.";
     } catch (err) {
         console.log(err);

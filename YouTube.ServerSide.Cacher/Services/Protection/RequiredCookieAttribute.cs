@@ -3,16 +3,15 @@ using Microsoft.AspNetCore.Mvc.Filters;
 
 namespace YouTube.ServerSide.Cacher.Services.Protection;
 
-public class RequiredApiKeyAttribute : ActionFilterAttribute
+public class RequiredCookieAttribute : ActionFilterAttribute
 {
     public override void OnActionExecuting(ActionExecutingContext context)
     {
-        // Todo: Check if its referring to the right resource as this should be resource specific
         var protectionService = context.HttpContext.RequestServices.GetRequiredService<IProtectionService>();
         if (protectionService.IsEnabled())
         {
-            var apikey = context.HttpContext.Request.Query["apikey"].ToString();
-            if (string.IsNullOrWhiteSpace(apikey) || !protectionService.ValidateApiKey(apikey))
+            if (!context.HttpContext.Request.Cookies.TryGetValue("persistantKey", out var cookieValue)
+                || string.IsNullOrWhiteSpace(cookieValue) || !protectionService.ValidateHashedKey(cookieValue))
             {
                 context.Result = new UnauthorizedResult();
                 return;
