@@ -58,10 +58,12 @@ Notes:
 
 1.Generate two different signing keys and put them in your environment variables. Note that the algorithm used requires a certain length of key. Generate with any method (ie: `openssl rand -hex 32`)
 
-| Variable                     | Value          |
+| Environment Variable         | Value          |
 |------------------------------|----------------|
 | Protection__ApiSigningKey    | random value 1 |
 | Protection__CookieSigningKey | random value 2 |
+| Protection__Enabled          | true           |
+| Protection__Password         | yourpassword   |
 
 2. Set a password. This should be secure. If it is not particularly secure, put it behind a service like fail2ban.
 
