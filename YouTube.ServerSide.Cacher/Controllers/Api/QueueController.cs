@@ -45,7 +45,7 @@ public class QueueController(DownloadManager downloadManager, IProtectionService
         string? token = null;
         if (protectionService.IsEnabled())
         {
-            token = protectionService.GenerateApiKey(SupportedSites.YouTube, id);
+            token = protectionService.GenerateWatchKey(SupportedSites.YouTube, id);
         }
 
         var dlInfo = downloadManager.QueueOrGetDownload(SupportedSites.YouTube, id, resultQuality, token: token);

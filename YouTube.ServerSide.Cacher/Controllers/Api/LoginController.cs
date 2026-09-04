@@ -12,7 +12,7 @@ public class LoginController(IProtectionService protectionService, ILogger<Login
     public IActionResult Stauts()
     {
         if (Request.Cookies.TryGetValue(cookieName, out var cookieValue)
-        && protectionService.ValidateHashedKey(cookieValue))
+        && protectionService.ValidatePersistantKey(cookieValue))
         {
             return Ok(new { authenticated = true, enabled = protectionService.IsEnabled() });
         }
@@ -25,7 +25,7 @@ public class LoginController(IProtectionService protectionService, ILogger<Login
         if (Request.Cookies.TryGetValue(cookieName, out var cookieValue)
             && !string.IsNullOrWhiteSpace(cookieValue))
         {
-            if (!protectionService.ValidateHashedKey(cookieValue))
+            if (!protectionService.ValidatePersistantKey(cookieValue))
             {
                 Response.Cookies.Delete(cookieName, new CookieOptions
                 {
@@ -70,7 +70,7 @@ public class LoginController(IProtectionService protectionService, ILogger<Login
 
     private LoginResponse GetLoginResponse()
     {
-        var cookie = protectionService.GenerateHashedKey();
+        var cookie = protectionService.GeneratePersistantKey();
         return new LoginResponse()
         {
             Cookie = cookie,

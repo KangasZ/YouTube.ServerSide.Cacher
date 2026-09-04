@@ -12,10 +12,10 @@ public interface IProtectionService
 {
     public bool IsEnabled();
     public bool ValidatePassword(string password);
-    public string GenerateApiKey(SupportedSites site, string id);
-    public bool ValidateApiKey(string apiKey);
-    public string GenerateHashedKey();
-    public bool ValidateHashedKey(string hashedKey);
+    public string GenerateWatchKey(SupportedSites site, string id);
+    public bool ValidateWatchKey(string apiKey, string requestedVideoId, SupportedSites requestedSite);
+    public string GeneratePersistantKey();
+    public bool ValidatePersistantKey(string hashedKey);
 }
 
 public class ProtectionService :IProtectionService
@@ -24,9 +24,11 @@ public class ProtectionService :IProtectionService
     private readonly AppSettings appSettings;
     private readonly byte[] apiKey;
     private readonly byte[] cookieKey;
+    private readonly ILogger<ProtectionService> logger;
 
     public ProtectionService(AppSettings appSettings, ILogger<ProtectionService> logger)
     {
+        this.logger = logger;
         this.appSettings = appSettings;
         this.apiKey = Encoding.UTF8.GetBytes(appSettings.Protection.ApiSigningKey);
         this.cookieKey = Encoding.UTF8.GetBytes(appSettings.Protection.CookieSigningKey);
@@ -47,7 +49,7 @@ public class ProtectionService :IProtectionService
 
     public bool ValidatePassword(string password) => password == appSettings.Protection.Password;
 
-    public string GenerateApiKey(SupportedSites site, string id)
+    public string GenerateWatchKey(SupportedSites site, string id)
     {
         var key = new SymmetricSecurityKey(apiKey);
         var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
@@ -68,14 +70,14 @@ public class ProtectionService :IProtectionService
         return new JwtSecurityTokenHandler().WriteToken(token);
     }
 
-    public bool ValidateApiKey(string apiKey)
+    public bool ValidateWatchKey(string apiKey, string requestedVideoId, SupportedSites requestedSite)
     {
         var handler = new JwtSecurityTokenHandler();
         var key = new SymmetricSecurityKey(this.apiKey);
 
         try
         {
-            handler.ValidateToken(apiKey, new TokenValidationParameters()
+            var claims = handler.ValidateToken(apiKey, new TokenValidationParameters()
             {
                 ValidateIssuer = true,
                 ValidIssuer = Issuer,
@@ -84,9 +86,25 @@ public class ProtectionService :IProtectionService
                 ValidateLifetime = true,
                 IssuerSigningKey = key,
                 ClockSkew = TimeSpan.Zero
-            }, out _);
+            }, out var validatedToken);
 
-            return true;
+            var claimVideoId = claims.Claims.FirstOrDefault(c => c.Type == JwtRegisteredClaimNames.Name);
+            var claimSite = claims.Claims.FirstOrDefault(c => c.Type == JwtRegisteredClaimNames.Address);
+            if (claimVideoId is null || claimSite is null)
+            {
+                logger.LogError("Watch claim Video ID or Site is missing.");
+                return false;
+            }
+
+            var claimIdParsed = claimVideoId.Value.ToString();
+            var siteParseSuccess = Enum.TryParse<SupportedSites>(claimSite.Value.ToString(), out var claimSiteParsed);
+
+            if (siteParseSuccess && claimIdParsed.Equals(requestedVideoId) && claimSiteParsed == requestedSite)
+            {
+                return true;
+            }
+            logger.LogError("Watch claim has incorrect video ID or site against requested Resource");
+            return false;
         }
         catch
         {
@@ -94,7 +112,7 @@ public class ProtectionService :IProtectionService
         }
     }
 
-    public string GenerateHashedKey()
+    public string GeneratePersistantKey()
     {
         var key = new SymmetricSecurityKey(cookieKey);
         var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
@@ -113,7 +131,7 @@ public class ProtectionService :IProtectionService
         return new JwtSecurityTokenHandler().WriteToken(token);
     }
 
-    public bool ValidateHashedKey(string apiKey)
+    public bool ValidatePersistantKey(string apiKey)
     {
         var handler = new JwtSecurityTokenHandler();
         var key = new SymmetricSecurityKey(cookieKey);
@@ -135,6 +153,7 @@ public class ProtectionService :IProtectionService
         }
         catch
         {
+            logger.LogError("Cookie was not validated");
             return false;
         }
     }

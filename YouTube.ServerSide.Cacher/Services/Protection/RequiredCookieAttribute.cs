@@ -11,7 +11,7 @@ public class RequiredCookieAttribute : ActionFilterAttribute
         if (protectionService.IsEnabled())
         {
             if (!context.HttpContext.Request.Cookies.TryGetValue("persistantKey", out var cookieValue)
-                || string.IsNullOrWhiteSpace(cookieValue) || !protectionService.ValidateHashedKey(cookieValue))
+                || string.IsNullOrWhiteSpace(cookieValue) || !protectionService.ValidatePersistantKey(cookieValue))
             {
                 context.Result = new UnauthorizedResult();
                 return;
