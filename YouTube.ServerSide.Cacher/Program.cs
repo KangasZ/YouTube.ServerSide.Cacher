@@ -33,25 +33,12 @@ public class Program
         builder.Services.AddSingleton<IYouTubeDownloader, YouTubeDownloader>();
         builder.Services.AddSingleton<IProtectionService, ProtectionService>();
 
-        builder.Services.AddCors(o =>
-            o.AddDefaultPolicy(p =>
-            {
-                var appSettings = builder.Configuration.Get<AppSettings>();
-                p.WithOrigins(appSettings?.AllowedOrigins ?? []).AllowAnyHeader().AllowAnyMethod();
-            })
-        );
-
         builder.Services.AddControllers();
 
         var app = builder.Build();
-        // Configure the HTTP request pipeline.
         if (app.Environment.IsDevelopment())
-            app.MapOpenApi();
-
-        if (!app.Environment.IsDevelopment())
         {
-            app.UseHsts();
-            app.UseCors();
+            app.MapOpenApi();
         }
 
         app.Use(
@@ -62,8 +49,6 @@ public class Program
                 h["X-Frame-Options"] = "DENY";
                 h["Referrer-Policy"] = "no-referrer";
                 h["Permissions-Policy"] = "geolocation=(), microphone=(), camera=()";
-                h["Content-Security-Policy"] =
-                    "default-src 'self'; frame-ancestors 'none'";
                 h["X-XSS-Protection"] = "0";
                 await next();
             }

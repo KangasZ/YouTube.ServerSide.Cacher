@@ -10,7 +10,6 @@ public class Paths
 
 public class AppSettings
 {
-    public string[] AllowedOrigins { get; set; } = Array.Empty<string>();
     public Paths Paths { get; set; } = new Paths();
     public AdditionalYtDlpArguments AdditionalYtDlpArguments { get; set; } =
         new AdditionalYtDlpArguments();

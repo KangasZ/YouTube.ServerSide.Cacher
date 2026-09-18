@@ -31,8 +31,6 @@ While it is mainly setup for docker, you can also install the prereqs and run it
 |------------------------------|-------------------------------|
 | Path__CookiePath             | /path/to/cookies.txt          |
 | Path__CachePath              | /path/to/cache/               |
-| AllowedOrigins__0            | https://your-url.your-tld     |
-| AllowedOrigins__1 (optional) | https://your-url-1.your-tld-1 |
 | Protection__Enabled          | true                          |
 | Protection__ApiSigningKey    | random value 1                |
 | Protection__CookieSigningKey | random value 2                |
