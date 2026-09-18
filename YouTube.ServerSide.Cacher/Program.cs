@@ -33,6 +33,14 @@ public class Program
         builder.Services.AddSingleton<IYouTubeDownloader, YouTubeDownloader>();
         builder.Services.AddSingleton<IProtectionService, ProtectionService>();
 
+        builder.Services.AddCors(o =>
+            o.AddDefaultPolicy(p =>
+            {
+                var appSettings = builder.Configuration.Get<AppSettings>();
+                p.WithOrigins(appSettings?.AllowedOrigins ?? []).AllowAnyHeader().AllowAnyMethod();
+            })
+        );
+
         builder.Services.AddControllers();
 
         var app = builder.Build();
@@ -41,7 +49,10 @@ public class Program
             app.MapOpenApi();
 
         if (!app.Environment.IsDevelopment())
+        {
             app.UseHsts();
+            app.UseCors();
+        }
 
         app.Use(
             async (ctx, next) =>
@@ -56,16 +67,6 @@ public class Program
                 await next();
             }
         );
-
-        builder.Services.AddCors(o =>
-            o.AddDefaultPolicy(p =>
-            {
-                var appSettings = builder.Configuration.Get<AppSettings>();
-                p.WithOrigins(appSettings?.AllowedOrigins ?? []).AllowAnyHeader().AllowAnyMethod();
-            })
-        );
-
-        app.UseCors();
 
         app.UseHttpsRedirection();
 
