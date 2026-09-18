@@ -62,7 +62,8 @@ public class Program
                 h["X-Frame-Options"] = "DENY";
                 h["Referrer-Policy"] = "no-referrer";
                 h["Permissions-Policy"] = "geolocation=(), microphone=(), camera=()";
-                h["Content-Security-Policy"] = "default-src 'none'; frame-ancestors 'none'";
+                h["Content-Security-Policy"] =
+                    "default-src 'none'; frame-ancestors 'none'; style-src 'unsafe-hashes' 'sha256-<your-style-hash>'";
                 h["X-XSS-Protection"] = "0";
                 await next();
             }
