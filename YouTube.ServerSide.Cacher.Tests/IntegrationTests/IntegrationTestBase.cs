@@ -22,16 +22,20 @@ public class IntegrationTestBase : IClassFixture<WebApplicationFactory<Program>>
     {
         var factory = applicationFactory.WithWebHostBuilder(builder =>
         {
-            builder.ConfigureAppConfiguration((context, config) =>
-            {
-                config.AddInMemoryCollection(new Dictionary<string, string?>
+            builder.ConfigureAppConfiguration(
+                (context, config) =>
                 {
-                    ["Protection:Enabled"] = "false",
-                    ["Protection:Password"] = "test-password",
-                    ["Protection:ApiSigningKey"] = "test-signing-key",
-                    ["Protection:CookieSigningKey"] = "test-cookie-key"
-                });
-            });
+                    config.AddInMemoryCollection(
+                        new Dictionary<string, string?>
+                        {
+                            ["Protection:Enabled"] = "false",
+                            ["Protection:Password"] = "test-password",
+                            ["Protection:ApiSigningKey"] = "test-signing-key",
+                            ["Protection:CookieSigningKey"] = "test-cookie-key",
+                        }
+                    );
+                }
+            );
 
             builder.ConfigureTestServices(services =>
             {

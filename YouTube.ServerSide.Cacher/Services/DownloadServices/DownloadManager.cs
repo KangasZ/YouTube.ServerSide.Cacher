@@ -1,6 +1,5 @@
 using System.Collections.Concurrent;
 using System.Text.RegularExpressions;
-using YouTube.ServerSide.Cacher.ExtensionMethods;
 using YouTube.ServerSide.Cacher.Models;
 using YouTube.ServerSide.Cacher.Services.CacheServices;
 using YouTube.ServerSide.Cacher.Services.DownloadServices.SiteDownloader;
@@ -13,10 +12,7 @@ public class DownloadManager
     private readonly ConcurrentDictionary<string, DownloadEntry> Downloads = new();
     private readonly CacheManager cacheManager;
 
-    private static readonly Regex BadIdRegex = new(
-        @"[\.\/\\]",
-        RegexOptions.Compiled
-    );
+    private static readonly Regex BadIdRegex = new(@"[\.\/\\]", RegexOptions.Compiled);
 
     public DownloadManager(IYouTubeDownloader youtubeDownloader, CacheManager cacheManager)
     {
@@ -87,7 +83,7 @@ public class DownloadManager
                     TotalProgress = 100,
                     Status = StatusEnum.Cached,
                     Quality = 0,
-                    Token = token
+                    Token = token,
                 }
             );
         }
@@ -112,7 +108,7 @@ public class DownloadManager
                             SiteId = id,
                             StartTime = DateTime.UtcNow,
                             Quality = quality,
-                            Token = token
+                            Token = token,
                         };
                         task = Task.Run(() => youtubeDownloader.DownloadVideo(downloadInfo));
                         return new DownloadEntry(task, downloadInfo);

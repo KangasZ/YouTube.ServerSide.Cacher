@@ -7,11 +7,18 @@ public class RequiredCookieAttribute : ActionFilterAttribute
 {
     public override void OnActionExecuting(ActionExecutingContext context)
     {
-        var protectionService = context.HttpContext.RequestServices.GetRequiredService<IProtectionService>();
+        var protectionService =
+            context.HttpContext.RequestServices.GetRequiredService<IProtectionService>();
         if (protectionService.IsEnabled())
         {
-            if (!context.HttpContext.Request.Cookies.TryGetValue("persistantKey", out var cookieValue)
-                || string.IsNullOrWhiteSpace(cookieValue) || !protectionService.ValidatePersistantKey(cookieValue))
+            if (
+                !context.HttpContext.Request.Cookies.TryGetValue(
+                    "persistantKey",
+                    out var cookieValue
+                )
+                || string.IsNullOrWhiteSpace(cookieValue)
+                || !protectionService.ValidatePersistantKey(cookieValue)
+            )
             {
                 context.Result = new UnauthorizedResult();
                 return;

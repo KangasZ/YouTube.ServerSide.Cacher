@@ -18,9 +18,7 @@ public class Program
 
         // Add configuration
         builder.Services.Configure<AppSettings>(builder.Configuration);
-        builder.Services.AddSingleton(sp =>
-            sp.GetRequiredService<IOptions<AppSettings>>().Value);
-
+        builder.Services.AddSingleton(sp => sp.GetRequiredService<IOptions<AppSettings>>().Value);
 
         // Add services to the container.
         builder.Services.AddAuthorization();
@@ -41,6 +39,33 @@ public class Program
         // Configure the HTTP request pipeline.
         if (app.Environment.IsDevelopment())
             app.MapOpenApi();
+
+        if (!app.Environment.IsDevelopment())
+            app.UseHsts();
+
+        app.Use(
+            async (ctx, next) =>
+            {
+                var h = ctx.Response.Headers;
+                h["X-Content-Type-Options"] = "nosniff";
+                h["X-Frame-Options"] = "DENY";
+                h["Referrer-Policy"] = "no-referrer";
+                h["Permissions-Policy"] = "geolocation=(), microphone=(), camera=()";
+                h["Content-Security-Policy"] = "default-src 'none'; frame-ancestors 'none'";
+                h["X-XSS-Protection"] = "0";
+                await next();
+            }
+        );
+
+        builder.Services.AddCors(o =>
+            o.AddDefaultPolicy(p =>
+            {
+                var appSettings = builder.Configuration.Get<AppSettings>();
+                p.WithOrigins(appSettings?.AllowedOrigins ?? []).AllowAnyHeader().AllowAnyMethod();
+            })
+        );
+
+        app.UseCors();
 
         app.UseHttpsRedirection();
 

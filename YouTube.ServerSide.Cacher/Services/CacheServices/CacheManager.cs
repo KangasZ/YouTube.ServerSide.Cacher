@@ -101,7 +101,10 @@ public class CacheManager
             var directoryinfo = new DirectoryInfo(directory);
             if (directoryinfo.Attributes.HasFlag(FileAttributes.ReparsePoint))
             {
-                logger.LogInformation("Not cleaning up directory for it is a link: {name}", directoryinfo.Name);
+                logger.LogInformation(
+                    "Not cleaning up directory for it is a link: {name}",
+                    directoryinfo.Name
+                );
             }
             CleanupDirectory(directory, deleteNewerThan);
         }
@@ -116,7 +119,12 @@ public class CacheManager
         foreach (var filePath in files)
         {
             var fileInfo = new FileInfo(filePath);
-            logger.LogInformation("{name}, {size}, {lastmodified}", fileInfo.Name, fileInfo.Length, fileInfo.LastWriteTimeUtc);
+            logger.LogInformation(
+                "{name}, {size}, {lastmodified}",
+                fileInfo.Name,
+                fileInfo.Length,
+                fileInfo.LastWriteTimeUtc
+            );
             if (fileInfo.Attributes.HasFlag(FileAttributes.ReparsePoint))
             {
                 logger.LogInformation("Not deleting file for it is a link: {name}", fileInfo.Name);
@@ -127,7 +135,11 @@ public class CacheManager
                 try
                 {
                     fileInfo.Delete();
-                    logger.LogInformation("File deleted: {name} {lastmodified}", fileInfo.Name, fileInfo.LastWriteTimeUtc);
+                    logger.LogInformation(
+                        "File deleted: {name} {lastmodified}",
+                        fileInfo.Name,
+                        fileInfo.LastWriteTimeUtc
+                    );
                 }
                 catch (Exception e)
                 {
@@ -136,7 +148,11 @@ public class CacheManager
             }
             else
             {
-                logger.LogInformation("File not deleted: {name} {lastmodified}", fileInfo.Name, fileInfo.LastWriteTimeUtc);
+                logger.LogInformation(
+                    "File not deleted: {name} {lastmodified}",
+                    fileInfo.Name,
+                    fileInfo.LastWriteTimeUtc
+                );
             }
         }
 

@@ -28,7 +28,12 @@ public class WatchController(DownloadManager downloadManager, CacheManager cache
         {
             return BadRequest();
         }
-        var downloadEntry = downloadManager.QueueOrGetDownload(SupportedSites.YouTube, videoId, 1080, shouldQueueIfMissing: false);
+        var downloadEntry = downloadManager.QueueOrGetDownload(
+            SupportedSites.YouTube,
+            videoId,
+            1080,
+            shouldQueueIfMissing: false
+        );
         if (downloadEntry == null)
         {
             return NotFound();

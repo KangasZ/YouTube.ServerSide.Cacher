@@ -8,7 +8,7 @@ This instead moves the caching and serving to a completely separate program, wit
 
 ## Why was it made?
 
-Because there wasn't a tool that did this in the way I wanted, so I made my own.
+Because there wasn't a tool that did this in the way I wanted, so I made my own. This is essentially just a wrapper on top of YT-DLP. It serves a very specific usecase and requirements. It is not meant to be a one-stop-shop solution for all your download needs, it serves one purpose and serves it well.
 
 ## How it works
 
@@ -16,33 +16,48 @@ All this app really does is use yt-dlp (with ffmpeg and deno as prereqs) to down
 
 There's some complexity in how it handles the index page and queuing downloads, however if you're interested just look at the code.
 
-Beside that, cached videos stick around for 1-2 days depending on when the service that cleans them runs.
+Beside that, cached videos stick around for some days depending on when the service that cleans them runs.
 
 ## Usage
 
 Host the dockerfile behind a reverse proxy and serve videos. If there's desire for more documentation on this please just make a issue or pr.
 
-A couple notes:
-You should define the following ENV Variables:
+While it is mainly setup for docker, you can also install the prereqs and run it that way.
+
+## Env Vars to Setup
+
 
 | Variable         | Value                |
 |------------------|----------------------|
 | Path__CookiePath | /path/to/cookies.txt |
 | Path__CachePath  | /path/to/cache/      |
+| BaseURL | https://your-url.your-tld |
+| Protection__Enabled          | true           |
+| Protection__ApiSigningKey    | random value 1 |
+| Protection__CookieSigningKey | random value 2 |
+| Protection__Password         | yourpassword   |
+
+### Path__CookiePath
 
 You can create a cookies.txt with yt-dlp with the following command: `yt-dlp --cookies-from-browser {browser} --cookies cookies.txt`.
 
-Generally I would recommend not using your 'main' account for this. The security should be fine but anyone can call your server and download videos, which if on a public website may cause a lot of churn that alphabet might not like.
+**DO NOT USE YOUR MAIN ACCOUNT**.
 
-You don't necessarily *have* to pass in cookies into YT-DLP, and the app *should* work without them (with some warnings) however for best quality and less worries, pass them in.
+### Protection
 
-The app is designed to run under docker, however should have no worries running outside a docker container.
+The protection module adds a set of signing keys and a password so your service is protected. I have not audited this in depth however it is relatively simply.
 
-The dockerfile installs the latest Deno and yt-dlp, then whatever ffmpeg package was most recent on ubuntu (which I believe the dotnet base image is based off). Do not that dockerbuilds will contact github for that info on yt-dlp.
+#### Generate signing keys
 
-## Security
+Use a random key for both signing keys. I use the following:
 
-There is an optional protection package. I would highly recommend enabling this, for your own safety.
+`openssl rand -hex 32`
+
+#### Securing the app
+
+Use a secure password and use somthing like `fail2ban` to protect the `POST api/login` route.
+
+#### Details
 
 The way it works is designed for vr chat and not the safest as it puts the api key in the query, however this was done specifically to allow cookie-less authentication for users.
 
@@ -54,29 +69,12 @@ Notes:
 1. The persistant token lasts for many days, and will refresh each time you view the site
 2. The api token is shorter lived
 
-### Setup
-
-1.Generate two different signing keys and put them in your environment variables. Note that the algorithm used requires a certain length of key. Generate with any method (ie: `openssl rand -hex 32`)
-
-| Environment Variable         | Value          |
-|------------------------------|----------------|
-| Protection__ApiSigningKey    | random value 1 |
-| Protection__CookieSigningKey | random value 2 |
-| Protection__Enabled          | true           |
-| Protection__Password         | yourpassword   |
-
-2. Set a password. This should be secure. If it is not particularly secure, put it behind a service like fail2ban.
-
 ## Reverse Proxy
 
 Considerations:
 - Reverse proxies may block large file transfers by default, make sure it does. Nginx has no limit on outbound files by default.
 - Reverse proxies may have gateway timeouts if no response is sent. In the case of this app, while yt-dlp downloads the video, it will not be sending any information to the client. You may want to add a larger timeout to your proxy.
-- You can setup a cache on your proxy such that videos are served from NGINX rather than .NET, however it's unclear how much of a benefit this is.
-- A good safety net includes fail2ban or something similar on the `POST /api/login` endpoint
 
 ## Self-Notes
-
-This is hosted both on my personal git server and on github. to push to both, use `git push github && git push gitea`
 
 Update integration tests to support protection and new endpoints

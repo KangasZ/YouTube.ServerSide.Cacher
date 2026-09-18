@@ -8,7 +8,8 @@ public class RequiredApiKeyAttribute : ActionFilterAttribute
 {
     public override void OnActionExecuting(ActionExecutingContext context)
     {
-        var protectionService = context.HttpContext.RequestServices.GetRequiredService<IProtectionService>();
+        var protectionService =
+            context.HttpContext.RequestServices.GetRequiredService<IProtectionService>();
         if (protectionService.IsEnabled())
         {
             var resource = context.HttpContext.Request.RouteValues["videoId"]?.ToString();
@@ -19,7 +20,10 @@ public class RequiredApiKeyAttribute : ActionFilterAttribute
             }
             var apikey = context.HttpContext.Request.Query["apikey"].ToString();
             // TODO: Update after youtube isnt the only supported
-            if (string.IsNullOrWhiteSpace(apikey) || !protectionService.ValidateWatchKey(apikey, resource, SupportedSites.YouTube))
+            if (
+                string.IsNullOrWhiteSpace(apikey)
+                || !protectionService.ValidateWatchKey(apikey, resource, SupportedSites.YouTube)
+            )
             {
                 context.Result = new UnauthorizedResult();
                 return;

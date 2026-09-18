@@ -5,14 +5,18 @@ namespace YouTube.ServerSide.Cacher.Controllers.Api;
 
 [ApiController]
 [Route("api/login")]
-public class LoginController(IProtectionService protectionService, ILogger<LoginController> logger) : ControllerBase
+public class LoginController(IProtectionService protectionService, ILogger<LoginController> logger)
+    : ControllerBase
 {
     const string cookieName = "persistantKey";
+
     [HttpGet]
-    public IActionResult Stauts()
+    public IActionResult Status()
     {
-        if (Request.Cookies.TryGetValue(cookieName, out var cookieValue)
-        && protectionService.ValidatePersistantKey(cookieValue))
+        if (
+            Request.Cookies.TryGetValue(cookieName, out var cookieValue)
+            && protectionService.ValidatePersistantKey(cookieValue)
+        )
         {
             return Ok(new { authenticated = true, enabled = protectionService.IsEnabled() });
         }
@@ -22,29 +26,38 @@ public class LoginController(IProtectionService protectionService, ILogger<Login
     [HttpPost]
     public IActionResult Login([FromBody] LoginRequest request)
     {
-        if (Request.Cookies.TryGetValue(cookieName, out var cookieValue)
-            && !string.IsNullOrWhiteSpace(cookieValue))
+        if (
+            Request.Cookies.TryGetValue(cookieName, out var cookieValue)
+            && !string.IsNullOrWhiteSpace(cookieValue)
+        )
         {
             if (!protectionService.ValidatePersistantKey(cookieValue))
             {
-                Response.Cookies.Delete(cookieName, new CookieOptions
-                {
-                    HttpOnly = true,
-                    Secure = true,
-                    SameSite = SameSiteMode.Strict
-                });
+                Response.Cookies.Delete(
+                    cookieName,
+                    new CookieOptions
+                    {
+                        HttpOnly = true,
+                        Secure = true,
+                        SameSite = SameSiteMode.Strict,
+                    }
+                );
                 return NoContent();
             }
             else
             {
                 var loginResponse = GetLoginResponse();
-                Response.Cookies.Append(cookieName, loginResponse.Cookie, new CookieOptions
-                {
-                    HttpOnly = true,
-                    Secure = true,
-                    SameSite = SameSiteMode.Strict,
-                    Expires = DateTimeOffset.UtcNow.AddDays(60)
-                });
+                Response.Cookies.Append(
+                    cookieName,
+                    loginResponse.Cookie,
+                    new CookieOptions
+                    {
+                        HttpOnly = true,
+                        Secure = true,
+                        SameSite = SameSiteMode.Strict,
+                        Expires = DateTimeOffset.UtcNow.AddDays(60),
+                    }
+                );
                 return Ok();
             }
         }
@@ -54,13 +67,17 @@ public class LoginController(IProtectionService protectionService, ILogger<Login
             if (protectionService.ValidatePassword(request.Password))
             {
                 var loginResponse = GetLoginResponse();
-                Response.Cookies.Append(cookieName, loginResponse.Cookie, new CookieOptions
-                {
-                    HttpOnly = true,
-                    Secure = true,
-                    SameSite = SameSiteMode.Strict,
-                    Expires = DateTimeOffset.UtcNow.AddDays(60)
-                });
+                Response.Cookies.Append(
+                    cookieName,
+                    loginResponse.Cookie,
+                    new CookieOptions
+                    {
+                        HttpOnly = true,
+                        Secure = true,
+                        SameSite = SameSiteMode.Strict,
+                        Expires = DateTimeOffset.UtcNow.AddDays(60),
+                    }
+                );
                 return Ok();
             }
         }
@@ -71,10 +88,7 @@ public class LoginController(IProtectionService protectionService, ILogger<Login
     private LoginResponse GetLoginResponse()
     {
         var cookie = protectionService.GeneratePersistantKey();
-        return new LoginResponse()
-        {
-            Cookie = cookie,
-        };
+        return new LoginResponse() { Cookie = cookie };
     }
 }
 

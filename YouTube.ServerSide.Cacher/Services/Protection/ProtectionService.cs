@@ -13,12 +13,16 @@ public interface IProtectionService
     public bool IsEnabled();
     public bool ValidatePassword(string password);
     public string GenerateWatchKey(SupportedSites site, string id);
-    public bool ValidateWatchKey(string apiKey, string requestedVideoId, SupportedSites requestedSite);
+    public bool ValidateWatchKey(
+        string apiKey,
+        string requestedVideoId,
+        SupportedSites requestedSite
+    );
     public string GeneratePersistantKey();
     public bool ValidatePersistantKey(string hashedKey);
 }
 
-public class ProtectionService :IProtectionService
+public class ProtectionService : IProtectionService
 {
     private const string Issuer = "YouTube.ServerSide.Cacher";
     private readonly AppSettings appSettings;
@@ -34,14 +38,20 @@ public class ProtectionService :IProtectionService
         this.cookieKey = Encoding.UTF8.GetBytes(appSettings.Protection.CookieSigningKey);
         if (appSettings.Protection.Enabled == false)
         {
-            logger.LogWarning("Protection is disabled, consider enabling this. Review the readme for more information.");
+            logger.LogWarning(
+                "Protection is disabled, consider enabling this. Review the readme for more information."
+            );
         }
 
-        if (appSettings.Protection.Password == "changeme" ||
-            appSettings.Protection.ApiSigningKey == "change this with environment variables" ||
-            appSettings.Protection.CookieSigningKey == "change this with environment variables")
+        if (
+            appSettings.Protection.Password == "changeme"
+            || appSettings.Protection.ApiSigningKey == "change this with environment variables"
+            || appSettings.Protection.CookieSigningKey == "change this with environment variables"
+        )
         {
-            logger.LogError("Protection secrets are still set to their defaults. Change these. Review the readme for more information.");
+            logger.LogError(
+                "Protection secrets are still set to their defaults. Change these. Review the readme for more information."
+            );
         }
     }
 
@@ -58,38 +68,52 @@ public class ProtectionService :IProtectionService
         {
             new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
             new Claim(JwtRegisteredClaimNames.Name, id),
-            new Claim(JwtRegisteredClaimNames.Address, site.ToString())
+            new Claim(JwtRegisteredClaimNames.Address, site.ToString()),
         };
 
-        var token = new JwtSecurityToken(issuer: Issuer,
+        var token = new JwtSecurityToken(
+            issuer: Issuer,
             audience: Issuer,
             claims: claims,
             expires: DateTime.UtcNow.AddDays(1),
-            signingCredentials: credentials);
+            signingCredentials: credentials
+        );
 
         return new JwtSecurityTokenHandler().WriteToken(token);
     }
 
-    public bool ValidateWatchKey(string apiKey, string requestedVideoId, SupportedSites requestedSite)
+    public bool ValidateWatchKey(
+        string apiKey,
+        string requestedVideoId,
+        SupportedSites requestedSite
+    )
     {
         var handler = new JwtSecurityTokenHandler();
         var key = new SymmetricSecurityKey(this.apiKey);
 
         try
         {
-            var claims = handler.ValidateToken(apiKey, new TokenValidationParameters()
-            {
-                ValidateIssuer = true,
-                ValidIssuer = Issuer,
-                ValidateAudience = true,
-                ValidAudience = Issuer,
-                ValidateLifetime = true,
-                IssuerSigningKey = key,
-                ClockSkew = TimeSpan.Zero
-            }, out var validatedToken);
+            var claims = handler.ValidateToken(
+                apiKey,
+                new TokenValidationParameters()
+                {
+                    ValidateIssuer = true,
+                    ValidIssuer = Issuer,
+                    ValidateAudience = true,
+                    ValidAudience = Issuer,
+                    ValidateLifetime = true,
+                    IssuerSigningKey = key,
+                    ClockSkew = TimeSpan.Zero,
+                },
+                out var validatedToken
+            );
 
-            var claimVideoId = claims.Claims.FirstOrDefault(c => c.Type == JwtRegisteredClaimNames.Name);
-            var claimSite = claims.Claims.FirstOrDefault(c => c.Type == JwtRegisteredClaimNames.Address);
+            var claimVideoId = claims.Claims.FirstOrDefault(c =>
+                c.Type == JwtRegisteredClaimNames.Name
+            );
+            var claimSite = claims.Claims.FirstOrDefault(c =>
+                c.Type == JwtRegisteredClaimNames.Address
+            );
             if (claimVideoId is null || claimSite is null)
             {
                 logger.LogError("Watch claim Video ID or Site is missing.");
@@ -97,13 +121,22 @@ public class ProtectionService :IProtectionService
             }
 
             var claimIdParsed = claimVideoId.Value.ToString();
-            var siteParseSuccess = Enum.TryParse<SupportedSites>(claimSite.Value.ToString(), out var claimSiteParsed);
+            var siteParseSuccess = Enum.TryParse<SupportedSites>(
+                claimSite.Value.ToString(),
+                out var claimSiteParsed
+            );
 
-            if (siteParseSuccess && claimIdParsed.Equals(requestedVideoId) && claimSiteParsed == requestedSite)
+            if (
+                siteParseSuccess
+                && claimIdParsed.Equals(requestedVideoId)
+                && claimSiteParsed == requestedSite
+            )
             {
                 return true;
             }
-            logger.LogError("Watch claim has incorrect video ID or site against requested Resource");
+            logger.LogError(
+                "Watch claim has incorrect video ID or site against requested Resource"
+            );
             return false;
         }
         catch
@@ -117,16 +150,15 @@ public class ProtectionService :IProtectionService
         var key = new SymmetricSecurityKey(cookieKey);
         var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
-        var claims = new[]
-        {
-            new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
-        };
+        var claims = new[] { new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()) };
 
-        var token = new JwtSecurityToken(issuer: Issuer,
+        var token = new JwtSecurityToken(
+            issuer: Issuer,
             audience: Issuer,
             claims: claims,
             expires: DateTime.UtcNow.AddDays(60),
-            signingCredentials: credentials);
+            signingCredentials: credentials
+        );
 
         return new JwtSecurityTokenHandler().WriteToken(token);
     }
@@ -138,16 +170,20 @@ public class ProtectionService :IProtectionService
 
         try
         {
-            handler.ValidateToken(apiKey, new TokenValidationParameters()
-            {
-                ValidateIssuer = true,
-                ValidIssuer = Issuer,
-                ValidateAudience = true,
-                ValidAudience = Issuer,
-                ValidateLifetime = true,
-                IssuerSigningKey = key,
-                ClockSkew = TimeSpan.Zero
-            }, out _);
+            handler.ValidateToken(
+                apiKey,
+                new TokenValidationParameters()
+                {
+                    ValidateIssuer = true,
+                    ValidIssuer = Issuer,
+                    ValidateAudience = true,
+                    ValidAudience = Issuer,
+                    ValidateLifetime = true,
+                    IssuerSigningKey = key,
+                    ClockSkew = TimeSpan.Zero,
+                },
+                out _
+            );
 
             return true;
         }

@@ -158,14 +158,18 @@ public class YouTubeDownloader(
         logger.LogInformation("yt-dlp exited with code {Code}", ytdlpProcess.ExitCode);
         if (ytdlpProcess.ExitCode != 0)
         {
-            information.EtaArray = new []{0d,0,0,0,0};
+            information.EtaArray = new[] { 0d, 0, 0, 0, 0 };
             information.Status = StatusEnum.Failed;
         }
         else
         {
-            information.EtaArray = new []{0d,0,0,0,0};
+            information.EtaArray = new[] { 0d, 0, 0, 0, 0 };
             information.Status = StatusEnum.Success;
-            information.TotalSize = cacheManager.GetFileInformation(SupportedSites.YouTube, information.SiteId)?.FileSizeInBytes ?? 0;
+            information.TotalSize =
+                cacheManager
+                    .GetFileInformation(SupportedSites.YouTube, information.SiteId)
+                    ?.FileSizeInBytes
+                ?? 0;
         }
 
         information.EndTime = DateTime.UtcNow;
@@ -211,7 +215,6 @@ public class YouTubeDownloader(
             var etaStr = etaMatch.Groups["eta"].Value;
             if (double.TryParse(etaStr, out var etaDouble))
             {
-
                 var arrayIndex = information.EtaCount % DownloadInformation.ArrayCount;
                 information.EtaArray[arrayIndex] = etaDouble;
                 information.EtaCount += 1;

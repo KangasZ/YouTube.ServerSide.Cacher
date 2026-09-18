@@ -10,6 +10,7 @@ public class Paths
 
 public class AppSettings
 {
+    public string[] AllowedOrigins { get; set; } = Array.Empty<string>();
     public Paths Paths { get; set; } = new Paths();
     public AdditionalYtDlpArguments AdditionalYtDlpArguments { get; set; } =
         new AdditionalYtDlpArguments();
@@ -30,7 +31,8 @@ public class SponsorBlockSettings
     public string[] Categories { get; set; } = [];
 }
 
-public class Protection {
+public class Protection
+{
     public bool Enabled { get; set; } = true;
     public string Password { get; set; } = string.Empty;
     public string ApiSigningKey { get; set; } = string.Empty;
