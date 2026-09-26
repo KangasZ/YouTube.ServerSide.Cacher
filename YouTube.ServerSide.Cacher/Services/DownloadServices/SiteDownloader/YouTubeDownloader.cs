@@ -71,7 +71,7 @@ public class YouTubeDownloader(
                 break;
         }
 
-        var format = $"-f \"bv*[height<={height}][vcodec~='^av01'][dynamic_range='SDR']+ba[acodec^=mp4a]\"";
+        var format = $"-f \"bv*[height<={height}][vcodec~='^av01'][ext=mp4][dynamic_range='SDR']+ba[ext=webm]\"";
         var progressTemplate = new List<string>
         {
             "download:[customDownloadStats] ",
@@ -96,16 +96,15 @@ public class YouTubeDownloader(
             $"\"https://youtube.com/watch?v={information.SiteId}\"",
         };
 
-        if (appSettings.RecodeVideo)
-        {
-            args.Add("--merge-output-format mkv");
-            args.Add("--recode-video mp4");
-            args.Add($"--postprocessor-args \"VideoConvertor:-c:v {appSettings.RecodeCodec} -preset fast -c:a copy -movflags +faststart\"");
-        }
-        else
-        {
-            args.Add("--merge-output-format mp4 --remux-video mp4");
-        }
+        // if (appSettings.RecodeVideo)
+        // {
+        //    args.Add("--recode-video mp4");
+        //    args.Add($"--postprocessor-args \"VideoConvertor:-c:v {appSettings.RecodeCodec} -preset fast -c:a copy -movflags +faststart\"");
+        // }
+        // else
+        // {
+        //     args.Add("--merge-output-format mp4 --remux-video mp4");
+        // }
 
         if (!string.IsNullOrWhiteSpace(appSettings.AdditionalYtDlpArguments.YouTubeArguments))
         {
