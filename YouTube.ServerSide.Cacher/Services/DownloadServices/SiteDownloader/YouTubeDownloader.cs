@@ -71,7 +71,7 @@ public class YouTubeDownloader(
                 break;
         }
 
-        var format = $"-f \"bv*[height<={height}]+ba[acodec^=mp4a]\"";
+        var format = $"-f \"bv*[height<={height}]+ba\"";
         var progressTemplate = new List<string>
         {
             "download:[customDownloadStats] ",
@@ -99,7 +99,7 @@ public class YouTubeDownloader(
         if (appSettings.RecodeVideo)
         {
            args.Add("--recode-video mp4");
-           args.Add($"--postprocessor-args \"VideoConvertor:-c:v {appSettings.RecodeCodec} -preset fast -c:a copy -movflags +faststart\"");
+           args.Add($"--postprocessor-args \"VideoConvertor:-c:v {appSettings.RecodeCodec} -c:a aac\"");
         }
         else
         {
