@@ -13,4 +13,4 @@ steps:
             tags:
                 - latest
                 - ${CI_COMMIT_SHA}
-            dockerfile: ./YouTube.ServerSide.Cacher/nvidia.Dockerfile
+            dockerfile: ./YouTube.ServerSide.Cacher/Dockerfile
