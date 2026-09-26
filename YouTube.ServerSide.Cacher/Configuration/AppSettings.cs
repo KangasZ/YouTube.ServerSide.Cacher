@@ -10,6 +10,7 @@ public class Paths
 
 public class AppSettings
 {
+    public bool RecodeVideo { get; set; } = false;
     public Paths Paths { get; set; } = new Paths();
     public AdditionalYtDlpArguments AdditionalYtDlpArguments { get; set; } =
         new AdditionalYtDlpArguments();
