@@ -90,9 +90,9 @@ public class YouTubeDownloader(
             "--audio-quality 0",
             format,
             $"-o \"{exportPath}\"",
-            // "--merge-output-format mp4 --remux-video mp4",
-            "--recode-video mp4",
-            "--postprocessor-args \"VideoConvertor:-c:v libx264 -c:a aac\"",
+            "--merge-output-format mp4 --remux-video mp4 --audio-format aac",
+            // "--recode-video mp4",
+            // "--postprocessor-args \"VideoConvertor:-c:v libx264 -c:a aac\"",
             "--progress-delta 0.5",
             $"--progress-template \"{string.Join("", progressTemplate)}\"", // full=%(progress)s info=%(info)s\
             $"\"https://youtube.com/watch?v={information.SiteId}\"",
