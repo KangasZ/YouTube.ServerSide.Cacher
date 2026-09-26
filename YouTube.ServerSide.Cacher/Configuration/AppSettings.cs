@@ -6,13 +6,11 @@ public class Paths
     public string CookiePath { get; set; } = string.Empty;
     public string? YtDlpPath { get; set; }
     public string? DenoPath { get; set; }
-    public string? FfmpegPath { get; set; }
 }
 
 public class AppSettings
 {
     public bool RecodeVideo { get; set; } = false;
-    public string RecodeCodec { get; set; } = "libx264";
     public Paths Paths { get; set; } = new Paths();
     public AdditionalYtDlpArguments AdditionalYtDlpArguments { get; set; } =
         new AdditionalYtDlpArguments();
