@@ -70,7 +70,7 @@ Notes:
 
 ## Troubleshooting
 
-- It doesnt work, waht the heck?
+- Video loads when testing in the browser however video gives some generic error in VRChat.
   - Install the necessary packages through your package manager for: AV1, WEBM, HEVC, and MPEG-2
     - https://apps.microsoft.com/detail/9N5TDP8VCMHS
     - https://apps.microsoft.com/detail/9MVZQVXJBQ9V
