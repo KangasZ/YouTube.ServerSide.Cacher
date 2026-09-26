@@ -68,16 +68,6 @@ Notes:
 1. The persistant token lasts for many days, and will refresh each time you view the site
 2. The api token is shorter lived
 
-## Troubleshooting
-
-- It doesnt work, waht the heck?
-  - Install the necessary packages through your package manager for: AV1, WEBM, HEVC, and MPEG-2
-    - https://apps.microsoft.com/detail/9N5TDP8VCMHS
-    - https://apps.microsoft.com/detail/9MVZQVXJBQ9V
-    - https://apps.microsoft.com/detail/9N95Q1ZZPMH4 -> View in Store
-    - https://apps.microsoft.com/detail/9N4D0MSMP0PT
-
-
 ## Reverse Proxy
 
 Considerations:
