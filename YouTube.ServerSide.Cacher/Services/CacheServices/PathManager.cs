@@ -22,8 +22,5 @@ public class PathManager
         DenoPath = string.IsNullOrWhiteSpace(configuration.Paths.DenoPath)
             ? DenoPath
             : configuration.Paths.DenoPath;
-        FfmpegPath = string.IsNullOrWhiteSpace(configuration.Paths.FfmpegPath)
-            ? FfmpegPath
-            : configuration.Paths.FfmpegPath;
     }
 }
