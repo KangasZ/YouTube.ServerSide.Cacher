@@ -51,7 +51,7 @@ public class CacheManager
         if (!sitePathFound || string.IsNullOrWhiteSpace(sitePath))
             throw new Exception("Video path error");
 
-        var videoIdWithExt = $"{videoId}.mp4";
+        var videoIdWithExt = $"{videoId}.webm";
         var fullVideoPath = Path.Combine(sitePath, videoIdWithExt);
         return fullVideoPath;
     }
