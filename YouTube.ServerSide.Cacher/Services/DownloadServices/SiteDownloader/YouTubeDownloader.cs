@@ -71,7 +71,7 @@ public class YouTubeDownloader(
                 break;
         }
 
-        var format = $"-f \"bv*[height<={height}][vcodec~='^av01'][ext=mp4][dynamic_range='SDR']+ba[ext=webm]\"";
+        var format = $"-f \"bv*[height<={height}][vcodec~='^av01'][ext=mp4][dynamic_range='SDR']+ba[acodec^=mp4a]\"";
         var progressTemplate = new List<string>
         {
             "download:[customDownloadStats] ",
