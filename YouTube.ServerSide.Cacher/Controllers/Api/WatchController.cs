@@ -8,7 +8,7 @@ using YouTube.ServerSide.Cacher.Services.Protection;
 namespace YouTube.ServerSide.Cacher.Controllers.Api;
 
 [ApiController]
-public class WatchController(DownloadManager downloadManager, CacheManager cacheManager)
+public class WatchController(DownloadManager downloadManager, CacheManager cacheManager, ILogger<WatchController> logger)
     : ControllerBase
 {
     [RequiredApiKey]
@@ -40,6 +40,7 @@ public class WatchController(DownloadManager downloadManager, CacheManager cache
         }
 
         await downloadEntry.Task;
+        logger.LogInformation("Requested watch video: {videoId}", videoId);
         var filePath = cacheManager.GetVideoPath(
             downloadEntry.DownloadInformation.Site,
             downloadEntry.DownloadInformation.SiteId

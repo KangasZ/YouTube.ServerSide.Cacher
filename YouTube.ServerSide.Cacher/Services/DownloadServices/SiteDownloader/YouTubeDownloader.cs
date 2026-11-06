@@ -133,7 +133,7 @@ public class YouTubeDownloader(
         {
             if (e.Data is null)
                 return;
-            logger.LogInformation("yt-dlp: {Line}", e.Data);
+            logger.LogTrace("yt-dlp: {Line}", e.Data);
             ParseStatsFromLine(information, e.Data);
         };
         ytdlpProcess.ErrorDataReceived += (_, e) =>
@@ -173,6 +173,7 @@ public class YouTubeDownloader(
         }
 
         information.EndTime = DateTime.UtcNow;
+        logger.LogInformation("yt-dlp final information:\n\tID:{id}\n\tStatus: {status}\n\tSize: {size}", information.SiteId, information.Status, information.TotalSize);
         return ytdlpProcess.ExitCode;
     }
 
